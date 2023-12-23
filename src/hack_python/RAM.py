@@ -1,6 +1,6 @@
-from . import Memory
+from . import Storage
 
-class RAM(Memory):
+class RAM(Storage):
     def __setitem__(self, key, value):
         value &= 0xFFFF
         self.mem[key] = value

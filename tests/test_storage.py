@@ -1,7 +1,7 @@
-from hack_python import Memory
+from hack_python import Storage
 
 def test_init():
-    m = Memory()
+    m = Storage()
     assert len(m) == 0x7FFF
 
 def test_load_binary():
@@ -9,7 +9,7 @@ def test_load_binary():
         '0b0000000000010000',
         '0b1110101010000111'
     ]
-    m = Memory(values=i)
+    m = Storage(values=i)
     assert m[0:2] == [0x10, 0xEA87]
 
 
@@ -18,7 +18,7 @@ def test_load_hex():
         '0x10',
         '0xea87'
     ]
-    m = Memory(values=i)
+    m = Storage(values=i)
     assert m[0:2] == [0x10, 0xEA87]
 
 
@@ -27,7 +27,7 @@ def test_load_dec():
         16,
         60039
     ]
-    m = Memory(values=i)
+    m = Storage(values=i)
     assert m[0:2] == [0x10, 0xEA87]    
 
 
@@ -36,5 +36,5 @@ def test_load_dec_str():
         '16',
         '60039'
     ]
-    m = Memory(values=i)
+    m = Storage(values=i)
     assert m[0:2] == [0x10, 0xEA87]    

@@ -1,4 +1,4 @@
-class Memory:
+class Storage:
     def __init__(self, values=[], length=0x7FFF):
         self.load(values, length)
 

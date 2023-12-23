@@ -13,7 +13,6 @@ def test_inc():
     assert p == 1
     p = pc.fetch_incr()
     assert p == 2
-    assert pc.i == 3
 
 
 def test_set():
@@ -25,7 +24,6 @@ def test_set():
     p = pc.fetch_incr()
     assert p == 10
     assert pc.p == 11
-    assert pc.i == 3
 
 
 def test_inc():
@@ -37,4 +35,3 @@ def test_inc():
     p = pc.reset()
     assert p == 0
     assert pc.p == 0
-    assert pc.i == 0

@@ -1,7 +1,7 @@
-from hack_python import CPU, Memory, RAM
+from hack_python import CPU, Storage, RAM
 
 def test_init():
-    rom = Memory()
+    rom = Storage()
     ram = RAM.RAM()
     cpu = CPU.CPU(rom=rom, ram=ram)
     assert cpu.run()
