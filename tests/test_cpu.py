@@ -1,7 +1,7 @@
-from hack_python import CPU, ROM, RAM
+from hack_python import CPU, Memory, RAM
 
 def test_init():
-    rom = ROM.ROM()
+    rom = Memory()
     ram = RAM.RAM()
     cpu = CPU.CPU(rom=rom, ram=ram)
     assert cpu.run()
@@ -9,4 +9,4 @@ def test_init():
 
 def test_decode_a():
     cpu = CPU.CPU(None, None)
-    assert cpu._decode(0xF0000) == (1, 0)
+    assert cpu._decode(0x8000) == (1, 0)
