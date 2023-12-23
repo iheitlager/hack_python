@@ -10,8 +10,8 @@ class Storage:
         self.width = mask(width)
         self.load(values, length)
 
-    def __getitem__(self, items):
-        return self.mem.__getitem__(items)
+    def __getitem__(self, index):
+        return self.mem[index]
 
     def __len__(self):
         return len(self.mem)
@@ -41,7 +41,7 @@ class Register:
     def store(self, value):
         self.value = value & self.width
 
-    def load(self):
+    def fetch(self):
         return self.value
 
     def reset(self):
