@@ -1,12 +1,10 @@
-from hack_python import CPU, Storage, RAM
+from hack_python import CPU, Storage
 
 def test_init():
-    rom = Storage()
-    ram = RAM.RAM()
-    cpu = CPU.CPU(rom=rom, ram=ram)
-    assert cpu.run()
+    cpu = CPU.CPU(None)
+    assert cpu.cycles == 0
 
 
-def test_decode_a():
-    cpu = CPU.CPU(None, None)
-    assert cpu._decode(0x8000) == (1, 0)
+def test_decode_a_instruction():
+    cpu = CPU.CPU(None)
+    assert cpu._decode(0x0010) == (0, 16)

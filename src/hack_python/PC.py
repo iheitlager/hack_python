@@ -11,6 +11,8 @@ class PC:
         self.p = 0x0000
         return self.p
 
-    def set(self, value):
+    def store(self, value):
         self.p = value & 0xFFFF
+
+    def fetch(self):
         return self.p

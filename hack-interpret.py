@@ -1,6 +1,6 @@
-from hack_python import CPU, ROM, RAM
+from hack_python import CPU, Storage, RAM
 
-rom = ROM.ROM(
+rom = Storage(
     [
         '0b0000000000010000',
         '0b1110101010000111'

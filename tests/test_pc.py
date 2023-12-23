@@ -19,11 +19,11 @@ def test_set():
     pc = PC.PC()
     p = pc.fetch_incr()
     assert p == 0
-    p = pc.set(10)
-    assert p == 10
+    pc.store(10)
+    assert pc.fetch() == 10
     p = pc.fetch_incr()
     assert p == 10
-    assert pc.p == 11
+    assert pc.fetch() == 11
 
 
 def test_inc():
@@ -34,4 +34,4 @@ def test_inc():
     assert p == 1
     p = pc.reset()
     assert p == 0
-    assert pc.p == 0
+    assert pc.fetch() == 0
