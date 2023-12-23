@@ -82,7 +82,7 @@ class CPU:
     def _execute(self, op, operand):
         if op == 0:         # A instruction
             self.A.store(operand)
-        else:               # illegal opcode
+        else:              
             alu = self._compute(operand[0])
             self._store(operand[1], alu)
             if self._jump(operand[2], alu):

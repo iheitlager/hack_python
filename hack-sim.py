@@ -1,4 +1,6 @@
-from hack_python import CPU, Storage, RAM
+from hack_python import CPU, Storage, RAM, disassemble
+
+dis = disassemble.disassembler()
 
 rom = Storage(
     [
@@ -28,8 +30,9 @@ rom = Storage(
 )
 
 def step(cpu):
+    opco = cpu.rom[cpu.pc.fetch()]
     print("PC   A    D    OPCO ({cycles:d})".format(cycles=cpu.cycles))
-    print("{pc:04x} {a:04x} {d:04x} {opco:04x}".format(pc=cpu.pc.fetch(), a=cpu.A.fetch(), d=cpu.D.fetch(), opco=cpu.rom[cpu.pc.fetch()]))
+    print("{pc:04x} {a:04x} {d:04x} {opco:04x}: {instr:s}".format(pc=cpu.pc.fetch(), a=cpu.A.fetch(), d=cpu.D.fetch(), opco=opco, instr=dis.disass_instr(opco)))
     i = input('-->')
 
 def main():
