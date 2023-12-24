@@ -1,7 +1,11 @@
 import argparse
-import sys
+import sys, os
 import readline # to enable commandline options
-from hack_python import CPU, Storage, RAM, disassemble
+from hack_python import (
+    CPU, Storage, RamSegment, parse_rom,
+    IO, disassemble
+)
+
 
 CRED = '\33[31m'
 CEND = '\033[0m'
@@ -28,7 +32,7 @@ class simulator:
                 value += "{v:04x} ".format(v=ram[j])
             print("{i:04x}: {value}".format(i=i, value=value))
 
-    def disassemble(self, line, rom):
+    def disassemble(self, line, pc, rom):
         endloop = 0
         if len(line) < 5:
             arg = [0,"0x0000", "0x020"]
@@ -41,13 +45,14 @@ class simulator:
             elif endloop != 2: endloop = 0
             instr = self.dis.disass_instr(opco)
             if addr in self.breakpoints:
-                dis_str = CRED + "{addr:04x}" + CEND + ": {opco:04x} {instr}"
+                dis_str = CRED + "{addr:04x}" + CEND + ":{p}{opco:04x} {instr}"
             elif endloop == 2:
-                dis_str = CRED + "{addr:04x}: {opco:04x} {instr} // detected endloop" + CEND
+                dis_str = CRED + "{addr:04x}:{p}{opco:04x} {instr} // detected endloop" + CEND
                 endloop = 0
             else:
-                dis_str = "{addr:04x}: {opco:04x} {instr}"
-            print(dis_str.format(addr=addr, opco=opco, instr=instr))
+                dis_str = "{addr:04x}:{p}{opco:04x} {instr}"
+            p = '>' if addr == pc else ' '
+            print(dis_str.format(addr=addr, p=p, opco=opco, instr=instr))
 
     def set_breakpoint(self, line):
         arg = line.split(' ')
@@ -114,7 +119,7 @@ class simulator:
         if inp in ['s', 'step']: return True
         if inp[0] == 'g' and self.endloop != 2: self.set_go(inp); return True
         if inp[0] == 'i': self.dump(inp, cpu.ram)
-        if inp[0] == 'd': self.disassemble(inp, cpu.rom)
+        if inp[0] == 'd': self.disassemble(inp, pc, cpu.rom)
         if inp[0] == 'b': self.set_breakpoint(inp)
         if inp[0] == 'x': self.delete_breakpoint(inp)
         if inp[0] == 'w': self.watch_ram(inp)
@@ -140,20 +145,20 @@ def main():
         help="romfile to load in simple binary format")
     args = parser.parse_args()
 
-    if args.rom:
-        lines = args.rom.readlines()
-        rom = ['0b'+x for x in lines]
-    else:
-        rom = []
-    rom = Storage(rom)
+
+    if not args.rom: sys.exit(os.EX_CONFIG)
+
+    lines = args.rom.readlines() if args.rom else []
+    rom = Storage(segments=[parse_rom(lines, 0x7FFF)])
+
     if args.rom != sys.stdin: args.rom.close()
 
+    
     sim = simulator(verbose=args.verbose)
-    ram = RAM.RAM(length=0x3FFF)
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(1, start=0x6000)])
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
     print('Hack simulator started, rom loaded with %d opcodes' % len(lines))
     cpu.run()
-  
 
 
 if __name__ == '__main__':

@@ -34,7 +34,8 @@ setup(
         "Natural Language :: English"
     ],
     install_requires=[
-        'gnureadline'
+        'gnureadline',
+        'getch'
     ],
     zip_safe=True,
 )

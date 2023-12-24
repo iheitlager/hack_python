@@ -1,4 +1,4 @@
-from . import PC, Register, RAM
+from . import PC, Register, Storage, RamSegment
 
 class IllegalOperand(Exception):
     "Raised when illegal operand is to be decoded"
@@ -6,10 +6,12 @@ class IllegalOperand(Exception):
 
 
 class CPU:
-    def __init__(self, rom, callback=None, ram=RAM.RAM()):
+    def __init__(self, rom, callback=None, ram=None):
         self.rom = rom          # instruction memory
+        if not ram:
+            ram = Storage(segments=[RamSegment(length=0x3FFF)])
         self.ram = ram          # data memory
-        self.pc = PC.PC()
+        self.pc = PC()
         self.A = Register()
         self.D = Register()
         self.callback = callback

@@ -1,12 +1,12 @@
 from hack_python import PC
 
 def test_init():
-    pc = PC.PC()
-    assert pc.p == 0
+    pc = PC()
+    assert pc.value == 0
 
 
 def test_inc():
-    pc = PC.PC()
+    pc = PC()
     p = pc.fetch_incr()
     assert p == 0
     p = pc.fetch_incr()
@@ -16,7 +16,7 @@ def test_inc():
 
 
 def test_set():
-    pc = PC.PC()
+    pc = PC()
     p = pc.fetch_incr()
     assert p == 0
     pc.store(10)
@@ -27,7 +27,7 @@ def test_set():
 
 
 def test_inc():
-    pc = PC.PC()
+    pc = PC()
     p = pc.fetch_incr()
     assert p == 0
     p = pc.fetch_incr()
