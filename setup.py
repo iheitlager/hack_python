@@ -7,8 +7,8 @@ with open("README.md", "r") as f:
 
 setup(
     name='hack-python',
-    version="0.0.1",
-    description='hack_interpreter in python',
+    version="0.0.8",
+    description='hack assembler/disassembler in python',
     long_description=long_description,
     license='MIT',
     author='Ilja Heitlager',
@@ -25,17 +25,16 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Topic :: Software Development :: Build Tools",
-        "Topic :: Database",
         "Topic :: Utilities",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.11",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English"
     ],
     install_requires=[
+        'gnureadline'
     ],
     zip_safe=True,
 )

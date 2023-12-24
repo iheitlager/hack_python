@@ -107,7 +107,15 @@ class CPU:
 
     def run(self):
         _exec = True
+        _interrupt = False
         while _exec:
-            if self.callback: self.callback(self)
-            _exec = self.step()
+            try:
+                if self.callback: 
+                    if self.callback(self, _interrupt):
+                        _exec = self.step()
+                else:
+                    _exec = self.step()
+                _interrupt = False
+            except KeyboardInterrupt:
+                _interrupt = True
         return True
