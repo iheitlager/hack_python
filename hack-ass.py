@@ -19,7 +19,9 @@ def dump_lines(code_table, out, binary=False, verbose=False):
                 s = "{address:04x}: " + code.ljust(17) + " {raw}\n"
             else:
                 code = str(hex(c.code))[2:].zfill(4).upper()
-                if verbose:
+                if verbose and c.a_value != None:
+                    s = "{address:04x}:       " + CYELLOW + code.ljust(11) + CEND + CBLUE + " {raw}" + CEND + "\n"
+                elif verbose:
                     s = "{address:04x}:       " + CYELLOW + code.ljust(11) + CEND + " {raw}\n"
                 else:
                     s = "{address:04x}:       " + code.ljust(11) + " {raw}\n"

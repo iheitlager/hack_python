@@ -33,6 +33,7 @@ opcodes = {
     "M+1": 0b1110111,
     "M-1": 0b1110010,
     "D+M": 0b1000010,
+    "M+D": 0b1000010,  # commutative
     "D-M": 0b1010011,
     "M-D": 0b1000111,
     "D&M": 0b1000000,
@@ -139,6 +140,7 @@ class assembler:
             try:
                 code = self._translate_opcode(m[1], m[2], m[3])
             except KeyError:
+                print(line, self.address)
                 raise IllegalOperand
 
             return code_line(line, address=self.address, dest=m[1], comp=m[2], jump=m[3], code=code)
