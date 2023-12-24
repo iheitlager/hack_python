@@ -6,7 +6,7 @@
 (LOOP)
     @i
     D=M // D=i
-    @10
+    @100
     D=D-A // D=i-100
     @END
     D;JGT // If (i-100)>0 goto END

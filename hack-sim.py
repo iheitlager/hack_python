@@ -1,6 +1,6 @@
 import argparse
 import sys
-import readline
+import readline # to enable commandline options
 from hack_python import CPU, Storage, RAM, disassemble
 
 CRED = '\33[31m'
@@ -43,7 +43,7 @@ class simulator:
             if addr in self.breakpoints:
                 dis_str = CRED + "{addr:04x}" + CEND + ": {opco:04x} {instr}"
             elif endloop == 2:
-                dis_str = CRED + "{addr:04x}: {opco:04x} {instr} // endloop" + CEND
+                dis_str = CRED + "{addr:04x}: {opco:04x} {instr} // detected endloop" + CEND
                 endloop = 0
             else:
                 dis_str = "{addr:04x}: {opco:04x} {instr}"
@@ -106,7 +106,7 @@ class simulator:
         print("PC   A    D    OPCO ({cycles:d})".format(cycles=cpu.cycles))
         print("{pc:04x} {a:04x} {d:04x} {opco:04x}: {instr:s}".format(pc=cpu.pc.fetch(), a=cpu.A.fetch(), d=cpu.D.fetch(), opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
-        inp = input('>')
+        inp = input('> ')
         if inp == "": return False
         if inp in ['q', 'quit']: print('goodbye'); sys.exit(0)
         if inp in ['r', 'reset']: cpu.reset()

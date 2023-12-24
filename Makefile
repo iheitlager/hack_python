@@ -1,5 +1,4 @@
-REPORTS ?= reports
-DOCS ?= docs
+VIRTUALENV ?= ~/.virtualenv
 
 default: clean test
 
@@ -7,23 +6,23 @@ all: $(TARGETS)
 
 clean: ## Clean all build files
 	-@echo y | pip uninstall hack-python
+	@find . -name *.pyc -delete
+	@rm -rf build hack-python.egg* dist
 
-.PHONY: test dist docs version help
-
-version: ## Show current version
-	@python -c "import hack-python; print(hack-python.__version__)"
-
-bandit: | $(REPORTS) ## Do bandit security check
-	@bandit --ini ./.bandit -r ./src --format json -o $(REPORTS)/bandit.json
+.PHONY: test help
 
 test: ## Run all tests
 	@pytest
-
-dist: ## Create a distribution
-	@python setup.py sdist --formats=gztar bdist_wheel
 
 dev: ## Install this package for development
 	@pip install -e .
 
 dev_env: ## Install the dev env
 	@pip install pytest
+
+virtualenv: $(VIRTUALENV)/hack/bin/activate  ## create a virtualenv 'hack' for this project
+	virtualenv $(VIRTUALENV)/hack
+
+help: ## Shows help screen
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
+	@echo ""
