@@ -5,6 +5,10 @@ class ReadOnlyException(Exception):
     """Exception raised when readonly memory is set"""
     pass
 
+class WriteOnlyException(Exception):
+    """Exception raised when writeonly memory is read"""
+    pass
+
 
 def parse_rom(values, length, width=16):
     mask = create_mask(width)
@@ -110,19 +114,12 @@ class Register:
         self.value = 0
         self.width = create_mask(width)
 
-    def store(self, value):
+    def load(self, value):
         self.value = value & self.width
 
-    def fetch(self):
+    def get(self):
         return self.value
 
     def reset(self):
         self.value = 0
         return self.value
-
-class PC(Register):
-
-    def fetch_incr(self):
-        v = self.value
-        self.value = (self.value + 1) & 0xFFFF
-        return v

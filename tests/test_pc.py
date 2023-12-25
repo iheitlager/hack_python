@@ -1,4 +1,4 @@
-from hack_python import PC
+from hack_python.CPU import PC
 
 def test_init():
     pc = PC()
@@ -7,31 +7,33 @@ def test_init():
 
 def test_inc():
     pc = PC()
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 0
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 1
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 2
 
 
 def test_set():
     pc = PC()
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 0
-    pc.store(10)
-    assert pc.fetch() == 10
-    p = pc.fetch_incr()
+    pc.load(10)
+    assert pc.get() == 10
+    p = pc.get_inc()
     assert p == 10
-    assert pc.fetch() == 11
+    assert pc.get() == 11
 
 
-def test_inc():
+def test_reset():
     pc = PC()
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 0
-    p = pc.fetch_incr()
+    p = pc.get_inc()
     assert p == 1
     p = pc.reset()
     assert p == 0
-    assert pc.fetch() == 0
+    assert pc.get() == 0
+
+

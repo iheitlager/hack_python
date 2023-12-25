@@ -54,15 +54,15 @@ class disassembler:
     def _decode(self, i):
         if i & 0x8000 == 0:     # A instr 0b14b13b12b11b10b9b8b7b6b5b4b3b2b1b0
             return (0, i & 0x7FFF)
-        else:                   # C instr 1x1x0a c5c4c3c3c2c0 d2d1d0 j2j1j0
+        else:                   # C instr 111a c1c2c3c4c5c6 d1d2d3 j1j2j3
             return (i >> 12, ((i & 0b1111111000000) >> 6, (i & 0b111000) >> 3, i & 0b111))
 
     def _store(self, dest):
         # Note we can store three targets (M,D,A) at once!
         ret = ""
-        if dest & 0b1: ret+="M"
-        if dest & 0b10: ret+="D"
         if dest & 0b100: ret+="A"
+        if dest & 0b10: ret+="D"
+        if dest & 0b1: ret+="M"
         return ret
 
     def disass_instr(self, i):

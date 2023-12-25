@@ -1,12 +1,21 @@
-from . import PC, Register, Storage, RamSegment
+from . import Register, Storage, RamSegment
 
 class IllegalOperand(Exception):
     "Raised when illegal operand is to be decoded"
     pass
 
 
+
+class PC(Register):
+
+    def get_inc(self):
+        v = self.value
+        self.value = (self.value + 1) & 0xFFFF
+        return v
+
+
 class CPU:
-    def __init__(self, rom, callback=None, ram=None):
+    def __init__(self, rom=None, callback=None, ram=None):
         self.rom = rom          # instruction memory
         if not ram:
             ram = Storage(segments=[RamSegment(length=0x3FFF)])
@@ -31,42 +40,42 @@ class CPU:
         elif comp == 0b0111010: return -1
 
         # A,D instructions (a=0)
-        elif comp == 0b0001100: return self.D.fetch()
-        elif comp == 0b0110000: return self.A.fetch()
-        elif comp == 0b0001101: return 0xFFFF ^ self.D.fetch()
-        elif comp == 0b0110001: return 0xFFFF ^ self.A.fetch()
-        elif comp == 0b0001111: return -self.D.fetch() & 0xFFFF
-        elif comp == 0b0110011: return -self.A.fetch() & 0xFFFF
-        elif comp == 0b0011111: return self.D.fetch() + 1
-        elif comp == 0b0110111: return self.A.fetch() + 1
-        elif comp == 0b0001110: return self.D.fetch() - 1
-        elif comp == 0b0110010: return self.A.fetch() - 1
-        elif comp == 0b0000010: return self.D.fetch() + self.A.fetch()
-        elif comp == 0b0010011: return self.D.fetch() - self.A.fetch()
-        elif comp == 0b0000111: return self.A.fetch() - self.D.fetch()
-        elif comp == 0b0000000: return self.D.fetch() & self.A.fetch()
-        elif comp == 0b0010101: return self.D.fetch() | self.A.fetch()
+        elif comp == 0b0001100: return self.D.get()
+        elif comp == 0b0110000: return self.A.get()
+        elif comp == 0b0001101: return 0xFFFF ^ self.D.get()
+        elif comp == 0b0110001: return 0xFFFF ^ self.A.get()
+        elif comp == 0b0001111: return -self.D.get() & 0xFFFF
+        elif comp == 0b0110011: return -self.A.get() & 0xFFFF
+        elif comp == 0b0011111: return self.D.get() + 1
+        elif comp == 0b0110111: return self.A.get() + 1
+        elif comp == 0b0001110: return self.D.get() - 1
+        elif comp == 0b0110010: return self.A.get() - 1
+        elif comp == 0b0000010: return self.D.get() + self.A.get()
+        elif comp == 0b0010011: return self.D.get() - self.A.get()
+        elif comp == 0b0000111: return self.A.get() - self.D.get()
+        elif comp == 0b0000000: return self.D.get() & self.A.get()
+        elif comp == 0b0010101: return self.D.get() | self.A.get()
 
         # M instructions (a=1)
-        elif comp == 0b1110000: return self.ram[self.A.fetch()]
-        elif comp == 0b1110001: return 0xFFFF ^ self.ram[self.A.fetch()]
-        elif comp == 0b1110011: return -self.ram[self.A.fetch()] & 0xFFFF
-        elif comp == 0b1110111: return self.ram[self.A.fetch()] + 1
-        elif comp == 0b1110010: return self.ram[self.A.fetch()] - 1
-        elif comp == 0b1000010: return self.D.fetch() + self.ram[self.A.fetch()]
-        elif comp == 0b1010011: return self.D.fetch() - self.ram[self.A.fetch()]
-        elif comp == 0b1000111: return self.ram[self.A.fetch()] - self.D.fetch()
-        elif comp == 0b1000000: return self.D.fetch() & self.ram[self.A.fetch()]
-        elif comp == 0b1010101: return self.D.fetch() | self.ram[self.A.fetch()]
+        elif comp == 0b1110000: return self.ram[self.A.get()]
+        elif comp == 0b1110001: return 0xFFFF ^ self.ram[self.A.get()]
+        elif comp == 0b1110011: return -self.ram[self.A.get()] & 0xFFFF
+        elif comp == 0b1110111: return self.ram[self.A.get()] + 1
+        elif comp == 0b1110010: return self.ram[self.A.get()] - 1
+        elif comp == 0b1000010: return self.D.get() + self.ram[self.A.get()]
+        elif comp == 0b1010011: return self.D.get() - self.ram[self.A.get()]
+        elif comp == 0b1000111: return self.ram[self.A.get()] - self.D.get()
+        elif comp == 0b1000000: return self.D.get() & self.ram[self.A.get()]
+        elif comp == 0b1010101: return self.D.get() | self.ram[self.A.get()]
         else: 
             raise IllegalOperand
 
     def _store(self, dest, value):
         # Note we can store three targets (M,D,A) at once!
         if dest == 0:  return
-        if dest & 0b1: self.ram[self.A.fetch()] = value  # M=
-        if dest & 0b10: self.D.store(value)  # D=
-        if dest & 0b100: self.A.store(value)  # A=  NB: comes last because of M=
+        if dest & 0b1: self.ram[self.A.get()] = value  # M=
+        if dest & 0b10: self.D.load(value)  # D=
+        if dest & 0b100: self.A.load(value)  # A=  NB: comes last because of M=
 
     def _jump(self, jump, comp):
         if jump == 0: return False
@@ -83,12 +92,12 @@ class CPU:
 
     def _execute(self, op, operand):
         if op == 0:         # A instruction
-            self.A.store(operand)
+            self.A.load(operand)
         else:              
             alu = self._compute(operand[0])
             self._store(operand[1], alu)
             if self._jump(operand[2], alu):
-                self.pc.store(self.A.fetch())
+                self.pc.load(self.A.get())
         return True
 
 
@@ -102,12 +111,14 @@ class CPU:
 
     def step(self):
         self.cycles += 1
-        i = self.rom[self.pc.fetch_incr()]
+        i = self.rom[self.pc.get_inc()]
         op, operant = self._decode(i)
         return self._execute(op, operant)
         
 
     def run(self):
+        if not self.rom:
+            return False
         _exec = True
         _interrupt = False
         while _exec:

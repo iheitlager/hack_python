@@ -156,6 +156,7 @@ def main():
     
     sim = simulator(verbose=args.verbose)
     ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(1, start=0x6000)])
+    print(str(ram))
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
     print('Hack simulator started, rom loaded with %d opcodes' % len(lines))
     cpu.run()

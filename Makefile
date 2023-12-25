@@ -14,6 +14,10 @@ clean: ## Clean all build files
 test: ## Run all tests
 	@pytest
 
+coverage: ## Checks the coverage
+	@coverage run -m pytest
+	@coverage report -m 
+
 dev: ## Install this package for development
 	@pip install -e .
 
