@@ -6,16 +6,17 @@ all: $(TARGETS)
 
 clean: ## Clean all build files
 	-@echo y | pip uninstall hack-python
+	@rm -rdf hack_python.egg*
 	@find . -name *.pyc -delete
-	@rm -rdf build hack-python.egg* dist
-	@rm -fd .pytest_cache .ruff_cache
+	@rm -rdf build dist
+	@rm -frd .pytest_cache .ruff_cache .coverage
 	@rm -rfd __pycache__
 
 .PHONY: test coverage help
 
 test: ## Run all tests
-	@ruff check .
 	@pytest
+	@ruff check .
 
 coverage: ## Checks the coverage
 	@coverage run -m pytest

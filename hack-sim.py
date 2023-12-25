@@ -1,5 +1,6 @@
 import argparse
-import sys, os
+import sys
+import os
 import readline # to enable commandline options
 from hack_python import (
     CPU, Storage, RamSegment, parse_rom,
