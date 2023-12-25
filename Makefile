@@ -7,11 +7,14 @@ all: $(TARGETS)
 clean: ## Clean all build files
 	-@echo y | pip uninstall hack-python
 	@find . -name *.pyc -delete
-	@rm -rf build hack-python.egg* dist
+	@rm -rdf build hack-python.egg* dist
+	@rm -fd .pytest_cache .ruff_cache
+	@rm -rfd __pycache__
 
-.PHONY: test help
+.PHONY: test coverage help
 
 test: ## Run all tests
+	@ruff check .
 	@pytest
 
 coverage: ## Checks the coverage
@@ -20,9 +23,9 @@ coverage: ## Checks the coverage
 
 dev: ## Install this package for development
 	@pip install -e .
-
-dev_env: ## Install the dev env
-	@pip install pytest
+	@python -m pip install ruff
+	@python -m pip install pytest
+	@python -m pip install coverage
 
 virtualenv: $(VIRTUALENV)/hack/bin/activate  ## create a virtualenv 'hack' for this project
 	virtualenv $(VIRTUALENV)/hack

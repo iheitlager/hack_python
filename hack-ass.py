@@ -13,13 +13,13 @@ CBLUE   = '\33[34m'
 
 def dump_lines(code_table, out, binary=False, verbose=False):
     for c in code_table:
-        if c.code != None:
+        if c.code is not None:
             if binary:
                 code = str(bin(c.code))[2:].zfill(16)
                 s = "{address:04x}: " + code.ljust(17) + " {raw}\n"
             else:
                 code = str(hex(c.code))[2:].zfill(4).upper()
-                if verbose and c.a_value != None:
+                if verbose and c.a_value is not None:
                     s = "{address:04x}:       " + CYELLOW + code.ljust(11) + CEND + CBLUE + " {raw}" + CEND + "\n"
                 elif verbose:
                     s = "{address:04x}:       " + CYELLOW + code.ljust(11) + CEND + " {raw}\n"
@@ -36,7 +36,7 @@ def dump_lines(code_table, out, binary=False, verbose=False):
 
 def dump_bin(code_table, out, binary=True):
     for c in code_table:
-        if c.code != None:
+        if c.code is not None:
             if binary:
                 code = str(bin(c.code))[2:].zfill(16)+'\n'
             else:
@@ -45,7 +45,7 @@ def dump_bin(code_table, out, binary=True):
 
 def dump_symbols(symbol_table, out, verbose=False):
     out.write("\n\nSymbols:\n")
-    for symbol, value in sorted(symbol_table.items(), key=lambda x:0 if x[1] == None else x[1]):
+    for symbol, value in sorted(symbol_table.items(), key=lambda x:0 if x[1] is None else x[1]):
         if verbose:
             out.write(("{0:10}: " + CYELLOW + "{1:04x}" + CEND + "\n").format(symbol, value or 0))
         else:

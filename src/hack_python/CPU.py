@@ -20,7 +20,7 @@ class CPU:
         if not ram:
             ram = Storage(segments=[RamSegment(length=0x3FFF)])
         self.ram = ram          # data memory
-        self.pc = PC()
+        self.PC = PC()
         self.A = Register()
         self.D = Register()
         self.callback = callback
@@ -80,7 +80,7 @@ class CPU:
     def _jump(self, jump, comp):
         if jump == 0: return False
         elif jump == 7: return True  # JMP
-        if comp > 0x7FFF:
+        if comp > 0x7FFF:  # refactor this to comp
             comp = (-(comp^0xFFFF)-1) 
         if jump == 1 and comp > 0: return True  # JGT
         elif jump == 2 and comp == 0: return True  # JEQ
@@ -93,27 +93,21 @@ class CPU:
     def _execute(self, op, operand):
         if op == 0:         # A instruction
             self.A.load(operand)
-        else:              
+        else:               # C instruction
             alu = self._compute(operand[0])
             self._store(operand[1], alu)
             if self._jump(operand[2], alu):
-                self.pc.load(self.A.get())
+                self.PC.load(self.A.get())
         return True
 
 
-    def reset(self, hard=False):
-        self.pc.reset()
-        self.A.reset()
-        self.D.reset()
-        self.ram.reset()
-        if hard: self.cycles = 0
-
+    def _fetch(self):
+        return self.rom[self.PC.get_inc()]
 
     def step(self):
         self.cycles += 1
-        i = self.rom[self.pc.get_inc()]
-        op, operant = self._decode(i)
-        return self._execute(op, operant)
+        op, operand = self._decode(self._fetch())
+        return self._execute(op, operand)
         
 
     def run(self):
@@ -132,3 +126,11 @@ class CPU:
             except KeyboardInterrupt:
                 _interrupt = True
         return True
+
+
+    def reset(self, hard=False):
+        self.PC.reset()
+        self.A.reset()
+        self.D.reset()
+        self.ram.reset()
+        if hard: self.cycles = 0

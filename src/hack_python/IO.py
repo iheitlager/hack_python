@@ -1,4 +1,4 @@
-from . import Segment, ReadOnlyException
+from . import Segment, WriteOnlyException
 import getch
 import sys
 
@@ -7,15 +7,26 @@ from tkinter import ttk
 
 
 class KeyboardSegment(Segment):
+    def __init__(self, start=0x6000, length=0x1):
+        self.__init__(self, length=length, start=start)
+
     def __getitem__(self, index):
         if index == self.start:
             return getch.getch()
 
 
 class SimpleDisplaySegment(Segment):
+    def __init__(self, start=0x4000, length=0x1):
+        self.__init__(self, length=length, start=start)
+        
     def __getitem__(self, index):
-        if index == self.start:
-            return getch.getch()
+        raise WriteOnlyException
+
+    def __setitem__(self, key, value):
+        if key != self.start:
+            raise IndexError('Single address IO device')
+        else:
+            sys.out.write(value)
 
 
 def screen():

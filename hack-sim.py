@@ -93,7 +93,7 @@ class simulator:
 
     def step(self, cpu, interrupt=False):
         '''This is the magic callback function'''
-        pc = cpu.pc.fetch()
+        pc = cpu.PC.fetch()
         opco = cpu.rom[pc]
         if self.endloop == 0 and pc == opco: self.endloop = 1
         elif self.endloop == 1 and opco == 0xea87: self.endloop = 2
@@ -155,7 +155,7 @@ def main():
 
     
     sim = simulator(verbose=args.verbose)
-    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(1, start=0x6000)])
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000)])
     print(str(ram))
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
     print('Hack simulator started, rom loaded with %d opcodes' % len(lines))
