@@ -35,7 +35,7 @@ def test_ram_segment2():
     ram[0x7FFF] = 1
     assert ram[0x7FFF:0x8002] == [1, 0, 0]
     with pytest.raises(IndexError) as excinfo:
-        a = ram[0]
+        _ = ram[0]
     assert str(excinfo.value) == 'list index out of range'
 
 def test_rom_storage():

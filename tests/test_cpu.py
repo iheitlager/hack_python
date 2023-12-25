@@ -1,4 +1,4 @@
-from hack_python import CPU, Storage
+from hack_python import CPU
 
 def test_init():
     cpu = CPU.CPU()

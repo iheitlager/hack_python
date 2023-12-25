@@ -1,3 +1,5 @@
+from hack_python.CPU import IllegalOperand
+
 CBLUE = '\033[94m'
 CEND = '\033[0m'
 
@@ -90,5 +92,5 @@ class disassembler:
         i = 0
         result = []
         for line in lines:
-            result.append([i, disass_instr(line)])
+            result.append([i, self.disass_instr(line)])
         return result

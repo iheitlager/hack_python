@@ -1,7 +1,7 @@
 import argparse
 import sys
 import os
-import readline # to enable commandline options
+import readline  # noqa: F401
 from hack_python import (
     CPU, Storage, RamSegment, parse_rom,
     IO, disassemble

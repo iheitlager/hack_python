@@ -1,4 +1,5 @@
 import re
+import sys
 
 class IllegalOperand(Exception):
     "Raised when illegal operand is to be decoded"
@@ -93,7 +94,7 @@ class assembler:
         '''resolve symbols and generate a-instructions'''
         self._resolve_symbol_table()
         for line in self.code_table:
-            if line.a_value and line.code == None:  # fill in the a instr label
+            if line.a_value and line.code is None:  # fill in the a instr label
                 try:
                     line.code = self.symbol_table[line.a_value]
                 except KeyError:
@@ -104,7 +105,7 @@ class assembler:
         for key, value in self.symbol_table.items():
             if key in registers:
                 self.symbol_table[key] = registers[key]
-            elif value == None:  # count vars starting from 16
+            elif value is None:  # count vars starting from 16
                 self.symbol_table[key] = i
                 i += 1
 
@@ -114,29 +115,29 @@ class assembler:
             c = code_line(line, address=self.address)
         elif self.assembling:           
             c = self._translate_line(line)
-            if c.code != None or c.a_value != None:
+            if c.code is not None or c.a_value is not None:
                 self.address += 1
         else:
             return
         self.code_table += [c]
 
     def _translate_line(self, line):
-        l = line.split('//')[0].strip()  # drop end comments
-        if l[0] == '@':
-            value = l[1:].strip()
+        opco = line.split('//')[0].strip()  # drop end comments
+        if opco[0] == '@':
+            operand = opco[1:].strip()
             try:
-                code = int(value)
+                code = int(operand)
             except ValueError:
                 code = None
-                if value not in self.symbol_table:
-                    self.symbol_table[value] = None
-            return code_line(line, address=self.address, a_value=value, code=code)
-        elif l[0] == '(':
-            label = l[1:-1].strip()
+                if operand not in self.symbol_table:
+                    self.symbol_table[operand] = None
+            return code_line(line, address=self.address, a_value=operand, code=code)
+        elif opco[0] == '(':
+            label = opco[1:-1].strip()
             self.symbol_table[label]=self.address
             return code_line(line, address=self.address, label=label)
         else:
-            m = re.match(r"([^=;]*)=?([^;]*);?([A-Z]*)$", l)
+            m = re.match(r"([^=;]*)=?([^;]*);?([A-Z]*)$", opco)
             try:
                 code = self._translate_opcode(m[1], m[2], m[3])
             except KeyError:

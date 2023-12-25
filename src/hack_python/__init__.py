@@ -15,7 +15,7 @@ def parse_rom(values, length, width=16):
     mem = [0x0000]*length
     i = 0
     for value in values[0:length]:
-        if type(value) == str:
+        if isinstance(value, str):
             value = value.strip()
             value = int(value, 2)
         mem[i] = value & mask
