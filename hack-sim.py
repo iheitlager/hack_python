@@ -90,11 +90,15 @@ class simulator:
         if len(arg) == 2:
             self.go = int(arg[1])
         else: 
-            self.go = 500
+            self.go = 499
+
+    def quit(self):
+        print('goodbye')
+        sys.exit(0)
 
     def step(self, cpu, interrupt=False):
         '''This is the magic callback function'''
-        pc = cpu.PC.fetch()
+        pc = cpu.PC.get()
         opco = cpu.rom[pc]
         if self.endloop == 0 and pc == opco: self.endloop = 1
         elif self.endloop == 1 and opco == 0xea87: self.endloop = 2
@@ -109,14 +113,17 @@ class simulator:
         print("")
         for w in self.watch:
             print(("{w:04x} " + CYELLOW + "{v:04x}" + CEND).format(w=w, v=cpu.ram[w]))
-        print("PC   A    D    OPCO ({cycles:d})".format(cycles=cpu.cycles))
-        print("{pc:04x} {a:04x} {d:04x} {opco:04x}: {instr:s}".format(pc=cpu.pc.fetch(), a=cpu.A.fetch(), d=cpu.D.fetch(), opco=opco, instr=self.dis.disass_instr(opco)))
+        print("PC     A      D      OPCO   ({cycles:d})".format(cycles=cpu.cycles))
+        print("0x{pc:04x} 0x{a:04x} 0x{d:04x} 0x{opco:04x}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
-        inp = input('> ')
+        try:
+            inp = input('> ')
+        except EOFError:
+            self.quit()
         if inp == "": return False
-        if inp in ['q', 'quit']: print('goodbye'); sys.exit(0)
-        if inp in ['r', 'reset']: cpu.reset()
-        if inp in ['rh', 'hard']: cpu.reset(hard=True)
+        if inp in ['q', 'quit']: self.quit()
+        if inp in ['r', 'reset']: cpu.reset(); self.endloop=0
+        if inp in ['rh', 'hard']: cpu.reset(hard=True); self.endloop=0
         if inp in ['s', 'step']: return True
         if inp[0] == 'g' and self.endloop != 2: self.set_go(inp); return True
         if inp[0] == 'i': self.dump(inp, cpu.ram)
@@ -154,12 +161,15 @@ def main():
 
     if args.rom != sys.stdin: args.rom.close()
 
-    
     sim = simulator(verbose=args.verbose)
-    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000)])
-    print(str(ram))
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), IO.HexDisplaySegment(start=0x4000)])
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
-    print('Hack simulator started, rom loaded with %d opcodes' % len(lines))
+
+    if args.verbose:
+        print('Hack simulator started, rom loaded with %d opcodes' % len(lines))
+        print(str(ram))
+        print(str(rom))
+
     cpu.run()
 
 

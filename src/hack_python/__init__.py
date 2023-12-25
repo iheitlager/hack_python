@@ -49,7 +49,7 @@ class Segment:
         return len(self._mem)
 
     def __str__(self):
-        return '.{name:10s} start=0x{start:04x} length=0x{length:04x} ({size}k, {width}b)'.format(
+        return '.{name:10s} start=0x{start:04X} length=0x{length:04X} ({size}k, {width}b)'.format(
             name=self.__class__.__name__, start=self.start, length=self.length, 
             size=(self.length + 1) // 1024, width=self.width // 8)
 
@@ -93,15 +93,18 @@ class Storage:
         # assume that main storage is always first segment
         try:
             self.segments[0][key] = value
-        except IndexError:
+        except (IndexError, ReadOnlyException):
             for segment in self.segments[1:]:
                 try:
                     segment[key] = value
                     return value
-                except IndexError:
+                except (IndexError, ReadOnlyException):
                     pass
             raise IndexError("Memory Index not available")    
 
+    def reset(self):
+        for segment in self.segments:
+            segment.reset()
 
     def __str__(self):
         res = ""

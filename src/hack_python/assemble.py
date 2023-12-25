@@ -18,27 +18,35 @@ opcodes = {
     "-D": 0b0001111,
     "-A": 0b0110011,
     "D+1": 0b0011111,
+    "1+D": 0b0011111,  # commutative
     "A+1": 0b0110111,
+    "1+A": 0b0110111,  # commutative
     "D-1": 0b0001110,
     "A-1": 0b0110010,
     "D+A": 0b0000010,
+    "A+D": 0b0000010,  # commutative
     "D-A": 0b0010011,
     "A-D": 0b0000111,
     "D&A": 0b0000000,
+    "A&D": 0b0000000,  # commutative
     "D|A": 0b0010101,
+    "A|D": 0b0010101,  # commutative
 
     # M instructions (a=1)
     "M": 0b1110000,
     "!M": 0b1110001,
     "-M": 0b1110011,
     "M+1": 0b1110111,
+    "1+M": 0b1110111,  # commutative
     "M-1": 0b1110010,
     "D+M": 0b1000010,
     "M+D": 0b1000010,  # commutative
     "D-M": 0b1010011,
     "M-D": 0b1000111,
     "D&M": 0b1000000,
-    "D|M": 0b1010101
+    "M&D": 0b1000000,  # commutative
+    "D|M": 0b1010101,
+    "M|D": 0b1010101   # commutative
 }
 
 
@@ -54,6 +62,11 @@ jmpcodes = {
 }
 
 registers = dict([("R"+str(i), i) for i in range(16)])
+
+def to_int(value):
+    if value[0:2] == '0b': return int(value, 2)
+    if value[0:2] == '0x': return int(value, 16)
+    else: return int(value)
 
 class code_line:
     def __init__(self, line,
@@ -126,7 +139,7 @@ class assembler:
         if opco[0] == '@':
             operand = opco[1:].strip()
             try:
-                code = int(operand)
+                code = to_int(operand)
             except ValueError:
                 code = None
                 if operand not in self.symbol_table:

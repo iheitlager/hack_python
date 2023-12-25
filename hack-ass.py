@@ -14,8 +14,8 @@ CBLUE = "\33[34m"
 
 def dump_lines(code_table, out, binary=False, verbose=False):
     for c in code_table:
+        s = "{address:04x}: "
         if c.code is not None:
-            s = "{address:04x}: "
             if binary:
                 code = str(bin(c.code))[2:].zfill(16)
                 s += code.ljust(17) + " {raw}\n"
@@ -70,7 +70,7 @@ def main():
         "-d", "--dump", action="store_true", help="dump in human readable format"
     )
     parser.add_argument(
-        "--debug", action="store_true", help="dump in human readable format"
+        "--debug", action="store_true", help="extra debugging remarks"
     )
     parser.add_argument(
         "-b", "--binary", action="store_true", help="use binary in dump"

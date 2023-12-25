@@ -8,7 +8,7 @@ from tkinter import ttk
 
 class KeyboardSegment(Segment):
     def __init__(self, start=0x6000, length=0x1):
-        self.__init__(self, length=length, start=start)
+       super(KeyboardSegment, self).__init__(length, start=start)
 
     def __getitem__(self, index):
         if index == self.start:
@@ -17,7 +17,7 @@ class KeyboardSegment(Segment):
 
 class SimpleDisplaySegment(Segment):
     def __init__(self, start=0x4000, length=0x1):
-        self.__init__(self, length=length, start=start)
+        super(SimpleDisplaySegment, self).__init__(length, start=start)
         
     def __getitem__(self, index):
         raise WriteOnlyException
@@ -26,7 +26,20 @@ class SimpleDisplaySegment(Segment):
         if key != self.start:
             raise IndexError('Single address IO device')
         else:
-            sys.out.write(value)
+            sys.stdout.write(value)
+
+class HexDisplaySegment(Segment):
+    def __init__(self, start=0x4000, length=0x1):
+        super(HexDisplaySegment, self).__init__(length, start=start)
+        
+    def __getitem__(self, index):
+        raise WriteOnlyException
+
+    def __setitem__(self, key, value):
+        if key != self.start:
+            raise IndexError('Single address IO device')
+        else:
+            sys.stdout.write("0x{value:04X}\n".format(value=value))
 
 
 def screen():

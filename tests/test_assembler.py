@@ -9,6 +9,7 @@ def test_lines():
     assert ass._translate_line("AM=M-1").code == 0b1111110010101000
     assert ass._translate_line("M=M+D").code == 0b1111000010001000 
     assert ass._translate_line("M=D+M").code == 0b1111000010001000     
+    assert ass._translate_line("M=1+D").code == 0b1110011111001000     
 
 def test_store():
     ass = assemble.assembler()
