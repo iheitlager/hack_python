@@ -2,6 +2,7 @@ from hack_python.CPU import IllegalOperand
 
 CBLUE = '\033[94m'
 CEND = '\033[0m'
+CRED = "\33[31m"
 
 opcodes = {
         0b0101010: "0",
@@ -50,8 +51,9 @@ jumpcodes = {
 }
 
 class disassembler:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, binary=False):
         self.verbose = verbose
+        self.binary = binary
 
     def _decode(self, i):
         if i & 0x8000 == 0:     # A instr 0b14b13b12b11b10b9b8b7b6b5b4b3b2b1b0
@@ -88,9 +90,31 @@ class disassembler:
         return ""
 
 
-    def disassemble(self, lines):
-        i = 0
+    def disassemble(self, lines, addr=0, terminator='\n'):
         result = []
-        for line in lines:
-            result.append([i, self.disass_instr(line)])
+        fopco = "{opco:04x}" if not self.binary else "{opco:016b}"
+        template = "{addr:04x}: " + fopco + " {instr}"
+        endloop = 0
+        disass = True    
+        i = 0
+        while disass:
+            line = lines[i]
+            opco = int(line.split("//")[0].strip(), 2)
+            if addr == opco and endloop == 0:
+                endloop = 1
+            elif opco == 0xEA87 and endloop == 1:
+                endloop = 2  # 0;JMP
+            elif endloop != 2:
+                endloop = 0
+            instr = self.disass_instr(opco)
+            if endloop == 2:
+                dis_str = CRED + template + " // detected endloop" + CEND
+                endloop = 0
+                disass = False
+            else:
+                dis_str = template
+            result.append(dis_str.format(addr=addr, opco=opco, instr=instr) + terminator)
+            addr += 1
+            i += 1
+
         return result
