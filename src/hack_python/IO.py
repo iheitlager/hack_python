@@ -26,7 +26,7 @@ class SimpleDisplaySegment(Segment):
         if key != self.start:
             raise IndexError('Single address IO device')
         else:
-            sys.stdout.write(value)
+            sys.stdout.write(chr(value))
 
 class HexDisplaySegment(Segment):
     def __init__(self, start=0x4000, length=0x1):

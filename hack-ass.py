@@ -53,7 +53,7 @@ def dump_symbols(symbol_table, out, verbose=False):
         symbol_table.items(), key=lambda x: 0 if x[1] is None else x[1]
     ):
         if verbose:
-            out.write("{0:10}: " + CYELLOW + "{1:04x}" + CEND + "\n").format(symbol, value or 0)
+            out.write(("{0:10}: " + CYELLOW + "{1:04x}" + CEND + "\n").format(symbol, value or 0))
         else:
             out.write("{0:10}: {1:04x}\n".format(symbol, value or 0))
 

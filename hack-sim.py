@@ -12,6 +12,15 @@ CRED = '\33[31m'
 CEND = '\033[0m'
 CYELLOW = '\33[33m'
 
+
+def get_arg(line):
+    arg = line.split(' ')
+    try:
+        return int(arg[1], 16)
+    except (IndexError, ValueError):
+        print(CRED + "Error with input: " + CEND + line)
+        return -1
+
 class simulator:
     def __init__(self, verbose=False):
         self.breakpoints = []
@@ -56,15 +65,13 @@ class simulator:
             print(dis_str.format(addr=addr, p=p, opco=opco, instr=instr))
 
     def set_breakpoint(self, line):
-        arg = line.split(' ')
-        bp = int(arg[1], 16)
-        if bp not in self.breakpoints:
+        bp = get_arg(line)
+        if bp >= 0 and bp not in self.breakpoints:
             self.breakpoints += [bp]    
 
     def delete_breakpoint(self, line):
-        arg = line.split(' ')
-        bp = int(arg[1], 16)
-        if bp in self.breakpoints:
+        bp = get_arg(line)
+        if bp >= 0 and bp in self.breakpoints:
             self.breakpoints.remove(bp)
 
     def list_breakpoints(self):
@@ -74,14 +81,12 @@ class simulator:
         print("Breakpoints: " + value)
 
     def watch_ram(self, line):
-        arg = line.split(' ')
-        w = int(arg[1], 16)
+        w = get_arg(line)
         if w not in self.watch:
             self.watch += [w]
 
     def unwatch_ram(self, line):
-        arg = line.split(' ')
-        w = int(arg[1], 16)
+        w = get_arg(line)
         if w in self.watch:
             self.watch.remove(w)
 
@@ -162,7 +167,7 @@ def main():
     if args.rom != sys.stdin: args.rom.close()
 
     sim = simulator(verbose=args.verbose)
-    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), IO.HexDisplaySegment(start=0x4000)])
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), IO.SimpleDisplaySegment(start=0x4000)])
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
 
     if args.verbose:

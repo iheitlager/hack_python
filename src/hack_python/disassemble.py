@@ -1,3 +1,4 @@
+from . import jump_options
 from hack_python.CPU import IllegalOperand
 
 CBLUE = '\033[94m'
@@ -5,9 +6,9 @@ CEND = '\033[0m'
 CRED = "\33[31m"
 
 opcodes = {
-        0b0101010: "0",
-        0b0111111: "1",
-        0b0111010: "-1",
+        0b010_1010: "0",
+        0b011_1111: "1",
+        0b011_1010: "-1",
 
         # A,D instructions (a=0)
         0b0001100: "D",
@@ -39,16 +40,7 @@ opcodes = {
         0b1010101: "D|M"
 }
 
-jumpcodes = {
-        0: "",
-        1: "JGT",
-        2: "JEQ",
-        3: "JGE",
-        4: "JLT",
-        5: "JNE",
-        6: "JLE",
-        7: "JMP"
-}
+jumpcodes = dict((x[0], x[1]) for x in jump_options)
 
 class disassembler:
     def __init__(self, verbose=False, binary=False):

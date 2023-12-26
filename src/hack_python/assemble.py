@@ -1,6 +1,8 @@
 import re
 import sys
 
+from . import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, jump_options
+
 class IllegalOperand(Exception):
     "Raised when illegal operand is to be decoded"
     pass
@@ -49,19 +51,7 @@ opcodes = {
     "M|D": 0b1010101   # commutative
 }
 
-
-jmpcodes = {
-    "": 0,
-    "JGT": 1,
-    "JEQ": 2,
-    "JGE": 3,
-    "JLT": 4,
-    "JNE": 5,
-    "JLE": 6,
-    "JMP": 7
-}
-
-registers = dict([("R"+str(i), i) for i in range(16)])
+jumpcodes = dict((x[1], x[0]) for x in jump_options)
 
 def to_int(value):
     if value[0:2] == '0b': return int(value, 2)
@@ -114,10 +104,12 @@ class assembler:
                     raise IllegalOperand
 
     def _resolve_symbol_table(self):
-        i = 16
+        i = HACK_STATIC
         for key, value in self.symbol_table.items():
-            if key in registers:
-                self.symbol_table[key] = registers[key]
+            if key in HACK_REGISTERS:
+                self.symbol_table[key] = HACK_REGISTERS[key]
+            elif key in HACK_POINTERS:
+                self.symbol_table[key] = HACK_POINTERS[key]
             elif value is None:  # count vars starting from 16
                 self.symbol_table[key] = i
                 i += 1
@@ -147,6 +139,7 @@ class assembler:
             return code_line(line, address=self.address, a_value=operand, code=code)
         elif opco[0] == '(':
             label = opco[1:-1].strip()
+            if label in HACK_POINTERS or label in HACK_REGISTERS: raise IllegalOperand(line)
             self.symbol_table[label]=self.address
             return code_line(line, address=self.address, label=label)
         else:
@@ -163,7 +156,7 @@ class assembler:
         vars = {
             "comp": opcodes[dest if jump else comp], # hack for regex
             "dest": 0 if jump else self._store(dest), # another hack for regex
-            "jump": jmpcodes[jump]
+            "jump": jumpcodes[jump]
         }
         return int("0b111{comp:07b}{dest:03b}{jump:03b}".format(**vars), 2)
 

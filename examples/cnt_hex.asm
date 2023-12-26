@@ -27,7 +27,7 @@
     @END
     0;JMP // Infinite loop
 (print_dec)   // D contains value
-    @0x4000         // HexDisplayq
+    @0x4000         // HexDisplay
     M=D
     @return_print_dec
     0;JMP // Return

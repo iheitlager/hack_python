@@ -1,3 +1,28 @@
+
+# Fixed symbols taken from chapter 7, p136
+HACK_REGISTERS = dict([("R"+str(i), i) for i in range(16)])
+HACK_POINTERS = {
+    'SP': 0,
+    'LCL': 1,
+    'ARG': 2,
+    'THIS': 3, 
+    'THAT': 4
+}
+HACK_STATIC = 16 # start of the static symbols
+
+
+jump_options = [
+    # Code, Label, [1,0,-1]
+    [0, "", [False, False, False]],
+    [1, "JGT", [True, False, False]],
+    [2, "JEQ", [False, True, False]],
+    [3, "JGE", [True, True, False]],
+    [4, "JLT", [False, False, True]],
+    [5, "JNE", [True, False, True]],
+    [6, "JLE", [False, True, True]],
+    [7, "JMP", [True, True, True]]
+]
+
 def create_mask(width):
     return int('1'*width, 2)
 
