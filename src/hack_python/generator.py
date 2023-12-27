@@ -137,7 +137,7 @@ class generator:
         self.extend(ll("Sys.init"), call("Main.main"))
         self.extend(ll("END"), "@END", "0;JMP")
 
-    def output(self):
+    def generate(self):
         result = []
         for item in self.items:
             if isinstance(item, list):
@@ -149,6 +149,7 @@ class generator:
         return result
 
     def _transform(self, item):
+        print(item)
         result = []
         if isinstance(item, label):
             result.append("("+str(item)+")")
@@ -157,12 +158,11 @@ class generator:
         elif isinstance(item, str):
             result.append(" "*4 + item)
         elif isinstance(item, list):
-            result.extend(self._transform(x) for x in item)
+            for x in item:
+                result.extend(self._transform(x))
         elif isinstance(item, code):
             for x in item.get():
                 result.extend(self._transform(x))
         else:
             result = [" "*4 + str(item)]
-        # if isinstance(result, list) and len(result) == 1:
-        #     result = result[0]
         return result
