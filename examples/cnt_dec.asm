@@ -1,5 +1,5 @@
 // Init 
-    @20  // Set Stack pointer to 20
+    @0x100  // Set Stack pointer to 0x100
     D=A
     @SP 
     M=D
@@ -90,58 +90,58 @@
     @SP
     M=M+1
 (print_loop)  
-              // for R0 in [10000,1000,100,10]
-    @SP       // pop R0
+              // for R5 in [10000,1000,100,10]
+    @SP       // pop R5
     M=M-1
     @SP
     A=M
     D=M
-    @R0
+    @R5
     M=D
     @print_last
     D;JLE
 
-    @v          // R1=v
+    @v          // R6=v
     D=M 
-    @R1         
+    @R6         
     M=D 
-    @R2         // R2=0
+    @R7         // R7=0
     M=0
-    @R3         // R3=0
+    @R8         // R8=0
     M=0
 
 (print_while_0)
-    @R1
+    @R6         // while R6>0:
     D=M 
     @print_end_while_0
     D;JLT
-    @R1         // R1-=R0
+    @R6         // R6-=R5
     D=M 
-    @R0
+    @R5
     D=D-M
-    @R1
+    @R6
     M=D 
-    @R2         // R2+=1
+    @R7         // R7+=1
     M=M+1
-    @R0         // R3+=R0
+    @R5         // R8+=R5
     D=M
-    @R3         
+    @R8         
     D=D+M 
     M=D
 (print_end_while_0)
-    @R2         // if R2 > 0
+    @R7         // if R7 > 0
     D=M 
     @print_end_if_1
     D;JGT
 
-    @R3         // v -= (R3-R0)
+    @R8         // v -= (R8-R5)
     D=M 
-    @R0
+    @R5
     D=D-M 
     @v
     M=M-D
 
-    @R2         // printChar(R2+47) (r+=chr(R2+47))
+    @R7         // printChar(R7+47) (r+=chr(R7+47))
     D=M 
     @0x002F 
     D=D+A 

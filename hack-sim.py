@@ -145,6 +145,7 @@ class simulator:
             print('i:inspect, w:watch ram, u:unwatch ram')
         return False
 
+OUTPUT = [IO.SimpleDisplaySegment, IO.HexDisplaySegment]
 
 def main():
     parser = argparse.ArgumentParser(
@@ -154,6 +155,8 @@ def main():
         version = f"{parser.prog} version 1.0.0")
     parser.add_argument("-v", "--verbose", action="store_true",
         help = "add verbosity to the simulator")
+    parser.add_argument("-o", dest="output", type=int, default=0,
+        help = "define output function")
     parser.add_argument("-f", "--rom", type=argparse.FileType('r'),
         help="romfile to load in simple binary format")
     args = parser.parse_args()
@@ -167,7 +170,7 @@ def main():
     if args.rom != sys.stdin: args.rom.close()
 
     sim = simulator(verbose=args.verbose)
-    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), IO.SimpleDisplaySegment(start=0x4000)])
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), OUTPUT[args.output](start=0x4000)])
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
 
     if args.verbose:

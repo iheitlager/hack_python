@@ -17,8 +17,8 @@ def test_store_in_assembler():
     for i in range(8):
         dest = ""
         if i & 0b100: dest += "A"   # order is relevant
-        if i & 0b10: dest += "D"        
-        if i & 0b1: dest += "M"
+        if i & 0b10:  dest += "D"        
+        if i & 0b1:   dest += "M"
         out1 = ass._store(dest)
         assert out1 == i
         out2 = dis._store(out1)

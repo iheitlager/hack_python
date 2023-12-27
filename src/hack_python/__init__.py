@@ -9,6 +9,7 @@ HACK_POINTERS = {
     'THAT': 4
 }
 HACK_STATIC = 16 # start of the static symbols
+HACK_STACK = 0x100
 
 
 jump_options = [
