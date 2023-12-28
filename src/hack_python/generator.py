@@ -73,7 +73,7 @@ class call(code):
         self.name = name
         if name not in FUNCTION_TABLE:
             FUNCTION_TABLE[name] = None
-        return_label = ll("return_"+name, n=True)
+        return_label = ll(name + "$ret_", n=True)
         header = [c("calling "+name)] + push_label(return_label)
         footer = ["@"+name+" // call function " + name, "0;JMP", return_label]
         # super(code, self).__init__(header=header, footer=footer)
