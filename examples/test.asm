@@ -82,10 +82,10 @@
     @SP
     A=M
     D=M
-    @R5
-    M=D
     @for_list_loop_3$end
     D;JLE
+    @R5
+    M=D
     @i
     D=M
     @R6
@@ -99,7 +99,8 @@
     @R9
     M=D // R9=i
 (while_loop_4)
-    R6
+    @R6
+    D=M
     @while_loop_4$end
     D;JGE
     @R5
@@ -113,7 +114,8 @@
     @R8
     M=M+D
 (if_block_5)
-    R7
+    @R7
+    D=M
     @if_block_5$end
     D;JLE
     @R8

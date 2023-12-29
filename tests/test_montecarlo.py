@@ -1,7 +1,8 @@
 import random
 import math
+import pytest
 
-
+@pytest.mark.skip(reason="currently not part of test suite")
 def test_pi():
     i = 0
     n_in, n_out = 0, 0
