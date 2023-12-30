@@ -10,16 +10,20 @@ def test_var_code():
     assert gen.generate(a.var('i')) == ["i"]
 
 def test_assign_const():
-    assert a.assign(a.var('i'), 0).code() == ["@i", "M=0 // i=0"]
+    gen = g.hack_code_generator()
+    assert gen.generate(a.assign(a.var('i'), 0)) == ["@i", "M=0 // i=0"]
 
 def test_assign_var():
-    assert a.assign(a.var('i'), a.var('j')).code() == ["@j", "D=M", "@i", "M=D // i=j"]
+    gen = g.hack_code_generator()
+    assert gen.generate(a.assign(a.var('i'), a.var('j'))) == ["@j", "D=M", "@i", "M=D // i=j"]
 
 def test_assign_code():
-    assert a.assign(a.var('i'), 100).code() == ["@100", "D=A", "@i", "M=D // i=100"]
+    gen = g.hack_code_generator()
+    assert gen.generate(a.assign(a.var('i'), 100)) == ["@100", "D=A", "@i", "M=D // i=100"]
 
 def test_add_var():
-    assert a.add(a.var("sum"), a.var("i")).code() == ['@i', 'D=M', '@sum', 'D=M+D']
+    gen = g.hack_code_generator()
+    assert gen.generate(a.add(a.var("sum"), a.var("i"))) == ['@i', 'D=M', '@sum', 'D=M+D']
 
 def test_assign_add():
     assert a.assign(a.var("sum"), a.add(a.var("sum"), a.var("i"))).code() == ['@i', 'D=M', '@sum', 'D=M+D', '@sum',  'M=D // sum=sum+i']

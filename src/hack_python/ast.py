@@ -50,22 +50,6 @@ class assign(ast):
         self.variable = variable
         self.expr = expr
 
-    def code(self) -> list[str]:
-        res = []
-        if self.expr in [-1, 0, 1]:
-            op = str(self.expr)
-        elif isinstance(self.expr, int):
-            res += ['@' + str(self.expr), "D=A"]
-            op = "D"
-        elif isinstance(self.expr, var):
-            res += ['@' + str(self.expr), "D=M"]
-            op = "D"
-        else:
-            res += self.expr.code()  # Assume value in D
-            op = "D"
-        res += ["@" + str(self.variable), "M=" + op + " // {}={}".format(str(self.variable), str(self.expr))]
-        return res
-
 class assign_add(assign):
     def code(self):
         res = []
@@ -173,18 +157,6 @@ class expr(ast):
     def __init__(self, left, right):
         self.left = left
         self.right = right
-
-    def code(self):
-        ret = []
-        if isinstance(self.right, var):
-            ret += ['@' + str(self.right), "D=M"]
-        elif isinstance(self.right, int):
-            ret += ['@' + str(self.right), "D=A"]
-        else:
-            raise SpecificationException
-        if isinstance(self.left, var):
-            ret += ['@' + str(self.left), "D=M{}D".format(self.SYMBOL)]
-        return ret
 
     def __str__(self):
         return "{}{}{}".format(str(self.left), self.SYMBOL, str(self.right))

@@ -53,26 +53,31 @@ class hack_code_generator:
     def __init__(self):
         pass
 
-    def generate(self, prog):
-        res = prog.visit(self)
+    def generate(self, item: a.ast) -> list[str]:
+        res = item.visit(self)
         return res
 
-    def visit(self, item):
+    def visit(self, item) -> list[str]:
         res = []
-        match item.__class__:
+        match type(item):
             case a.program:  # noqa: F841
                 res += self.gen_program(item)
             case a.call_subroutine:  # noqa: F841
                 res += self.gen_call_subroutine(item)
             case a.subroutine:  # noqa: F841
                 res += self.gen_subroutine(item)
+            case a.assign:  # noqa: F841
+                res += self.gen_assign(item)
             case a.var:
                 res += [str(item)]
+            case a.add:
+                res += self.gen_expr(item)
             case _:
-                res += item.code()
+                raise NotImplementedError(item)
+                # res += item.code()
         return res
 
-    def gen_program(self, item):
+    def gen_program(self, item) -> list[str]:
         res = ["// program {} starts here".format(item.name)]
         res += ["@%d" % HACK_STACK, "D=A", "@SP", "M=D"]
         res += ["@Sys.init", "0;JMP"]
@@ -89,7 +94,7 @@ class hack_code_generator:
 
         return res
 
-    def gen_call_subroutine(self, item):
+    def gen_call_subroutine(self, item) -> list[str]:
         ret_label = a.label(item.name+"$ret")
         res = ["// calling {}".format(item.name)]
         res += push_value(ret_label)
@@ -98,7 +103,7 @@ class hack_code_generator:
 
         return res
 
-    def gen_subroutine(self, item):
+    def gen_subroutine(self, item) -> list[str]:
         res = ["", "// subroutine {} starts here".format(item.name)]
         res += ["({})".format(item.name)]
         for line in item.lines:
@@ -106,3 +111,32 @@ class hack_code_generator:
         res += ["({}$end)".format(item.name)] + pop_value("A") + ["0;JMP // Return to caller", "// end " + item.name, ""]
 
         return res
+
+    def gen_assign(self, item) -> list[str]:
+        res = []
+        if item.expr in [-1, 0, 1]:
+            op = str(item.expr)
+        elif isinstance(item.expr, int):
+            res += ['@' + str(item.expr), "D=A"]
+            op = "D"
+        elif isinstance(item.expr, a.var):
+            res += ['@' + str(item.expr), "D=M"]
+            op = "D"
+        else:
+            res += item.expr.code()  # Assume value in D
+            op = "D"
+        res += ["@" + str(item.variable), "M=" + op + " // {}={}".format(str(item.variable), str(item.expr))]
+        return res
+
+    def gen_expr(self, item: a.expr) -> list[str]:
+        ret = []
+        if isinstance(item.right, a.var):
+            ret += ['@' + str(item.right), "D=M"]
+        elif isinstance(item.right, int):
+            ret += ['@' + str(item.right), "D=A"]
+        else:
+            raise SpecificationException
+        if isinstance(item.left, a.var):
+            ret += ['@' + str(item.left), "D=M{}D".format(item.SYMBOL)]
+        return ret
+

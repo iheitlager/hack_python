@@ -35,38 +35,38 @@ class CPU:
 
 
     def _compute(self, comp):
-        if comp == 0b0101010: return 0  # 0
-        elif comp == 0b0111111: return 1  # 1
-        elif comp == 0b0111010: return -1  # -1
+        if comp == 0b010_1010: return 0  # 0
+        elif comp == 0b011_1111: return 1  # 1
+        elif comp == 0b011_1010: return -1  # -1
 
         # A,D instructions (a=0)
-        elif comp == 0b0001100: return self.D.get()  # D
-        elif comp == 0b0110000: return self.A.get()  # A
-        elif comp == 0b0001101: return 0xFFFF ^ self.D.get()  # not D
-        elif comp == 0b0110001: return 0xFFFF ^ self.A.get()  # not A
-        elif comp == 0b0001111: return -self.D.get() & 0xFFFF  # -D
-        elif comp == 0b0110011: return -self.A.get() & 0xFFFF  # -A
-        elif comp == 0b0011111: return self.D.get() + 1  # D+1
-        elif comp == 0b0110111: return self.A.get() + 1  # A+1
-        elif comp == 0b0001110: return self.D.get() - 1  # D-1
-        elif comp == 0b0110010: return self.A.get() - 1  # A-1
-        elif comp == 0b0000010: return self.D.get() + self.A.get()  # D+A
-        elif comp == 0b0010011: return self.D.get() - self.A.get()  # D-A
-        elif comp == 0b0000111: return self.A.get() - self.D.get()  # A-D
-        elif comp == 0b0000000: return self.D.get() & self.A.get()  # D&A
-        elif comp == 0b0010101: return self.D.get() | self.A.get()  # D|A
+        elif comp == 0b000_1100: return self.D.get()  # D
+        elif comp == 0b011_0000: return self.A.get()  # A
+        elif comp == 0b000_1101: return 0xFFFF ^ self.D.get()  # not D
+        elif comp == 0b011_0001: return 0xFFFF ^ self.A.get()  # not A
+        elif comp == 0b000_1111: return -self.D.get() & 0xFFFF  # -D
+        elif comp == 0b011_0011: return -self.A.get() & 0xFFFF  # -A
+        elif comp == 0b001_1111: return self.D.get() + 1  # D+1
+        elif comp == 0b011_0111: return self.A.get() + 1  # A+1
+        elif comp == 0b000_1110: return self.D.get() - 1  # D-1
+        elif comp == 0b011_0010: return self.A.get() - 1  # A-1
+        elif comp == 0b000_0010: return self.D.get() + self.A.get()  # D+A
+        elif comp == 0b001_0011: return self.D.get() - self.A.get()  # D-A
+        elif comp == 0b000_0111: return self.A.get() - self.D.get()  # A-D
+        elif comp == 0b000_0000: return self.D.get() & self.A.get()  # D&A
+        elif comp == 0b001_0101: return self.D.get() | self.A.get()  # D|A
 
         # M instructions (a=1)
-        elif comp == 0b1110000: return self.ram[self.A.get()]    # M
-        elif comp == 0b1110001: return 0xFFFF ^ self.ram[self.A.get()]  # not M
-        elif comp == 0b1110011: return -self.ram[self.A.get()] & 0xFFFF   # -M
-        elif comp == 0b1110111: return self.ram[self.A.get()] + 1  # M+1
-        elif comp == 0b1110010: return self.ram[self.A.get()] - 1  # M-1
-        elif comp == 0b1000010: return self.D.get() + self.ram[self.A.get()]   # D+M
-        elif comp == 0b1010011: return self.D.get() - self.ram[self.A.get()]   # D-M
-        elif comp == 0b1000111: return self.ram[self.A.get()] - self.D.get()   # M-D
-        elif comp == 0b1000000: return self.D.get() & self.ram[self.A.get()]   # D&M
-        elif comp == 0b1010101: return self.D.get() | self.ram[self.A.get()]   # D|M
+        elif comp == 0b111_0000: return self.ram[self.A.get()]    # M
+        elif comp == 0b111_0001: return 0xFFFF ^ self.ram[self.A.get()]  # not M
+        elif comp == 0b111_0011: return -self.ram[self.A.get()] & 0xFFFF   # -M
+        elif comp == 0b111_0111: return self.ram[self.A.get()] + 1  # M+1
+        elif comp == 0b111_0010: return self.ram[self.A.get()] - 1  # M-1
+        elif comp == 0b100_0010: return self.D.get() + self.ram[self.A.get()]   # D+M
+        elif comp == 0b101_0011: return self.D.get() - self.ram[self.A.get()]   # D-M
+        elif comp == 0b100_0111: return self.ram[self.A.get()] - self.D.get()   # M-D
+        elif comp == 0b100_0000: return self.D.get() & self.ram[self.A.get()]   # D&M
+        elif comp == 0b101_0101: return self.D.get() | self.ram[self.A.get()]   # D|M
         else: 
             raise IllegalOperand
 
