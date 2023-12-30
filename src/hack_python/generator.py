@@ -6,6 +6,16 @@ class SpecificationException(Exception):
     pass
 
 
+def pprint(code_list, end='\n'):
+    for line in code_list:
+        if not line:
+            res = ""
+        elif line[0] == '(' or line[:2] == '//':
+            res = "{}".format(line)
+        else:
+            res = '    {}'.format(line)
+        yield res + end
+
 def pop_value(amd):
     for x in amd:
         if x not in "AMD":
@@ -75,12 +85,6 @@ class program(ast):
             res += line.code()
         res += self._end()
 
-        i = 0
-        for i in range(len(res)):
-            if not res[i]:
-                pass
-            elif res[i][0] != '(' and res[i][:2] != '//':
-                res[i] = '    {}'.format(res[i])
         return res
 
     def _init(self):
@@ -97,6 +101,19 @@ class program(ast):
         res += ["@Main.main", "0;JMP"]
         res += ["(Sys.init$end)"]
         res += ["(END)", "@END", "0;JMP"]
+        return res
+
+
+class call_subroutine(ast):
+    def __init__(self, name):
+        self.name = name
+    
+    def code(self):
+        ret_label = label(self.name+"$ret")
+        res = ["// calling {}".format(self.name)]
+        res += push_value(ret_label)
+        res += ["@"+self.name, "0;JMP"]
+        res += ["({})".format(str(ret_label))]
         return res
 
 class subroutine(ast):
@@ -206,7 +223,7 @@ class while_loop(block):
     def code(self):
         ll = label("while_loop", n=True)
         ret = ["({})".format(str(ll))]
-        ret += if_goto(self.expr, str(ll)+'$end')
+        ret += if_goto(self.expr, str(ll)+'$end', reverse=True)
         for line in self.lines:
             ret += line.code()
         ret += ["@"+str(ll), "0;JMP"]
@@ -216,7 +233,7 @@ class while_loop(block):
 class if_block(block):
     def __init__(self, expr, *args):
         self.expr = expr
-        self.lines = args or []
+        self.lines = list(args) or []
 
     def code(self):
         ll = label("if_block", n=True)
@@ -296,3 +313,14 @@ class gt(comp):
 class ge(comp):
     pass
 
+class le(comp):
+    pass
+
+class lt(comp):
+    pass
+
+class eq(comp):
+    pass
+
+class ne(comp):
+    pass

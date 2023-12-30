@@ -55,12 +55,12 @@ class simulator:
             elif endloop != 2: endloop = 0
             instr = self.dis.disass_instr(opco)
             if addr in self.breakpoints:
-                dis_str = CRED + "{addr:04x}" + CEND + ":{p}{opco:04x} {instr}"
+                dis_str = CRED + "{addr:04X}" + CEND + ":{p}{opco:04X} {instr}"
             elif endloop == 2:
-                dis_str = CRED + "{addr:04x}:{p}{opco:04x} {instr} // detected endloop" + CEND
+                dis_str = CRED + "{addr:04X}:{p}{opco:04X} {instr} // detected endloop" + CEND
                 endloop = 0
             else:
-                dis_str = "{addr:04x}:{p}{opco:04x} {instr}"
+                dis_str = "{addr:04X}:{p}{opco:04X} {instr}"
             p = '>' if addr == pc else ' '
             print(dis_str.format(addr=addr, p=p, opco=opco, instr=instr))
 
@@ -77,7 +77,7 @@ class simulator:
     def list_breakpoints(self):
         value = ""
         for bp in self.breakpoints:
-            value += "{v:04x} ".format(v=bp)
+            value += "0x{v:04X} ".format(v=bp)
         print("Breakpoints: " + value)
 
     def watch_ram(self, line):
@@ -109,18 +109,26 @@ class simulator:
         elif self.endloop == 1 and opco == 0xea87: self.endloop = 2
         elif self.endloop != 2: self.endloop = 0
         if not interrupt and self.go > 0 and pc not in self.breakpoints and self.endloop != 2:
-            if self.verbose and self.i % 500 == 500-1:
-                sys.stdout.write('.')
+            if self.verbose:
+                print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{opco:04X}: {instr:s} ({cycles:d})".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), opco=opco, instr=self.dis.disass_instr(opco), cycles=cpu.cycles))
+                if self.i % 500 == 500-1:
+                    print('.', end="")
             self.i += 1
             self.go -= 1
             return True
         self.go = False
+        self._printout(cpu, pc, opco)
+        return self._readinput(cpu, pc)
+
+    def _printout(self, cpu, pc, opco):
         print("")
         for w in self.watch:
-            print(("{w:04x} " + CYELLOW + "{v:04x}" + CEND).format(w=w, v=cpu.ram[w]))
+            print(("{w:04X} " + CYELLOW + "{v:04X}" + CEND).format(w=w, v=cpu.ram[w]))
         print("PC     A      D      OPCO   ({cycles:d})".format(cycles=cpu.cycles))
-        print("0x{pc:04x} 0x{a:04x} 0x{d:04x} 0x{opco:04x}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), opco=opco, instr=self.dis.disass_instr(opco)))
+        print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
+
+    def _readinput(self, cpu, pc):
         try:
             inp = input('> ')
         except EOFError:
@@ -130,6 +138,7 @@ class simulator:
         if inp in ['r', 'reset']: cpu.reset(); self.endloop=0
         if inp in ['rh', 'hard']: cpu.reset(hard=True); self.endloop=0
         if inp in ['s', 'step']: return True
+        if inp[0] == 'v': self.verbose = not self.verbose
         if inp[0] == 'g' and self.endloop != 2: self.set_go(inp); return True
         if inp[0] == 'i': self.dump(inp, cpu.ram)
         if inp[0] == 'd': self.disassemble(inp, pc, cpu.rom)
@@ -140,7 +149,7 @@ class simulator:
         if inp in ['l', 'list']: self.list_breakpoints()
         if inp in ['h', 'help']: 
             print('q:quit, r:reset, rh:hard reset, h:help')
-            print('s:step, g:go, d:disassemble')
+            print('s:step, g:go, d:disassemble, v:toggle verbose')
             print('b: set breakpoint, x: delete breakpoint, l: list breakpoints')
             print('i:inspect, w:watch ram, u:unwatch ram')
         return False

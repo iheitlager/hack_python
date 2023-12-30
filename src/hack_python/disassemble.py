@@ -11,26 +11,26 @@ opcodes = {
         0b011_1010: "-1",
 
         # A,D instructions (a=0)
-        0b0001100: "D",
-        0b0110000: "A",
-        0b0001101: "!D",
-        0b0110001: "!A",
-        0b0001111: "-D",
-        0b0110011: "-A",
-        0b0011111: "D+1",
-        0b0110111: "A+1",
-        0b0001110: "D-1",
-        0b0110010: "A-1",
-        0b0000010: "D+A",
-        0b0010011: "D-A",
-        0b0000111: "A-D",
-        0b0000000: "D&A",
-        0b0010101: "D|A",
+        0b000_1100: "D",
+        0b011_0000: "A",
+        0b000_1101: "!D",
+        0b011_0001: "!A",
+        0b000_1111: "-D",
+        0b011_0011: "-A",
+        0b001_1111: "D+1",
+        0b011_0111: "A+1",
+        0b000_1110: "D-1",
+        0b011_0010: "A-1",
+        0b000_0010: "D+A",
+        0b001_0011: "D-A",
+        0b000_0111: "A-D",
+        0b000_0000: "D&A",
+        0b001_0101: "D|A",
 
         # M instructions (a=1)
-        0b1110000: "M",
-        0b1110001: "!M",
-        0b1110011: "-M",
+        0b111_0000: "M",
+        0b111_0001: "!M",
+        0b111_0011: "-M",
         0b1110111: "M+1",
         0b1110010: "M-1",
         0b1000010: "D+M",
@@ -51,7 +51,7 @@ class disassembler:
         if i & 0x8000 == 0:     # A instr 0b14b13b12b11b10b9b8b7b6b5b4b3b2b1b0
             return (0, i & 0x7FFF)
         else:                   # C instr 111a c1c2c3c4c5c6 d1d2d3 j1j2j3
-            return (i >> 12, ((i & 0b1111111000000) >> 6, (i & 0b111000) >> 3, i & 0b111))
+            return (i >> 12, ((i & 0b1_1111_1100_0000) >> 6, (i & 0b11_1000) >> 3, i & 0b111))
 
     def _store(self, dest):
         # Note we can store three targets (M,D,A) at once!
@@ -65,9 +65,9 @@ class disassembler:
         op, operand = self._decode(i)
         if op == 0:         # A instruction
             if self.verbose:
-                return CBLUE + "@{operand:04x}".format(operand=operand) + CEND
+                return CBLUE + "@0x{operand:04X}".format(operand=operand) + CEND
             else:
-                return "@{operand:04x}".format(operand=operand)
+                return "@0x{operand:04X}".format(operand=operand)
         else:              # C instruction
             try:
                 comp = opcodes[operand[0]]
@@ -84,8 +84,8 @@ class disassembler:
 
     def disassemble(self, lines, addr=0, terminator='\n'):
         result = []
-        fopco = "{opco:04x}" if not self.binary else "{opco:016b}"
-        template = "{addr:04x}: " + fopco + " {instr}"
+        fopco = "{opco:04X}" if not self.binary else "{opco:016b}"
+        template = "{addr:04X}: " + fopco + " {instr}"
         endloop = 0
         disass = True    
         i = 0
