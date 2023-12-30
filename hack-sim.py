@@ -138,7 +138,7 @@ class simulator:
         if inp in ['r', 'reset']: cpu.reset(); self.endloop=0
         if inp in ['rh', 'hard']: cpu.reset(hard=True); self.endloop=0
         if inp in ['s', 'step']: return True
-        if inp[0] == 'v': self.verbose = not self.verbose
+        if inp[0] == 'v': self.verbose = not self.verbose; print("Verbose: {}".format("on" if self.verbose else "off"))
         if inp[0] == 'g' and self.endloop != 2: self.set_go(inp); return True
         if inp[0] == 'i': self.dump(inp, cpu.ram)
         if inp[0] == 'd': self.disassemble(inp, pc, cpu.rom)
@@ -163,7 +163,7 @@ def main():
     parser.add_argument("--version", action="version",
         version = f"{parser.prog} version 1.0.0")
     parser.add_argument("-v", "--verbose", action="store_true",
-        help = "add verbosity to the simulator")
+        help = "add verbosity to the simulator [0:Simple, 1:Hex]")
     parser.add_argument("-o", dest="output", type=int, default=0,
         help = "define output function")
     parser.add_argument("-f", "--rom", type=argparse.FileType('r'),
