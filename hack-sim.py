@@ -179,7 +179,7 @@ def main():
     if args.rom != sys.stdin: args.rom.close()
 
     sim = simulator(verbose=args.verbose)
-    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), OUTPUT[args.output](start=0x4000)])
+    ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), OUTPUT[args.output](start=0x4000), IO.PingSegment(start=0x5000)])
     cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
 
     if args.verbose:

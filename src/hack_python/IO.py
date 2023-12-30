@@ -41,6 +41,18 @@ class HexDisplaySegment(Segment):
         else:
             sys.stdout.write("0x{value:04X}\n".format(value=value))
 
+class PingSegment(Segment):
+    def __init__(self, start=0x5000, length=0x1):
+        super(PingSegment, self).__init__(length, start=start)
+        
+    def __getitem__(self, index):
+        raise WriteOnlyException
+
+    def __setitem__(self, key, value):
+        if key != self.start:
+            raise IndexError('Single address IO device')
+        else:
+            sys.stdout.write('\a')
 
 def screen():
     root = Tk()

@@ -22,9 +22,9 @@
     @i
     D=M
     @sum
-    M=M+D
+    M=M+D // sum+=i
     @i
-    M=M+1
+    M=M+1 // i+=1
 // calling print_i2a
     @print_i2a$ret
     D=A
@@ -39,6 +39,10 @@
     @while_loop_1
     0;JMP
 (while_loop_1$end)
+    @10
+    D=A
+    @20480
+    M=D // 0x5000=10
 (Main.main$end)
     @SP
     M=M-1
@@ -117,13 +121,13 @@
     @R5
     D=M
     @R6
-    M=M-D
+    M=M-D // R6-=R5
     @R7
-    M=M+1
+    M=M+1 // R7+=1
     @R5
     D=M
     @R8
-    M=M+D
+    M=M+D // R8+=R5
     @while_loop_3
     0;JMP
 (while_loop_3$end)
@@ -135,17 +139,17 @@
     @R8
     D=M
     @R9
-    M=M-D
+    M=M-D // R9-=R8
     @R5
     D=M
     @R9
-    M=M+D
+    M=M+D // R9+=R5
     @47
     D=A
     @R7
     D=M+D
     @16384
-    M=D // 16384=R7+47
+    M=D // 0x4000=R7+47
 (if_block_4$end)
     @for_list_loop_2
     0;JMP
@@ -155,11 +159,11 @@
     @R9
     D=M+D
     @16384
-    M=D // 16384=R9+48
+    M=D // 0x4000=R9+48
     @10
     D=A
     @16384
-    M=D // 16384=10
+    M=D // 0x4000=10
 (print_i2a$end)
     @SP
     M=M-1

@@ -1,14 +1,15 @@
+from dataclasses import dataclass, field
+
 class SpecificationException(Exception):
     pass
-
 
 class ast:
     def visit(self, visitor):
         return visitor.visit(self)
 
+@dataclass
 class var(ast):
-    def __init__(self, name):
-        self.name = name
+    name: str
 
     def __str__(self):
         return self.name
@@ -16,119 +17,58 @@ class var(ast):
 class param(var):
     pass
 
+@dataclass
 class label(ast):
-    follow = 1
-    def __init__(self, name, n=False):
-        self.name = name
-        self.n = label.follow if n else None
-        if n:
-            label.follow += 1       
+    name: str
+    n: bool = field(default=False, compare=False, hash=False)
 
-    def __str__(self):
-        ret = self.name
-        if self.n:
-            ret += "_" + str(self.n)
-        return ret
-
-class program(ast):
-    def __init__(self, name, *args):
-        self.name = name 
-        self.lines = args or []
-
-    def extend(self, *args):
-        self.lines.extend(args)
-
-
-
+@dataclass
 class call_subroutine(ast):
-    def __init__(self, name, *args):
-        self.name = name
-        self.params = args
-    
+    name: str
+    params: list = field(default_factory=list)
+
+@dataclass    
 class assign(ast):
-    def __init__(self, variable, expr):
-        self.variable = variable
-        self.expr = expr
+    variable: str
+    expr: ast
 
 class assign_add(assign):
-    def code(self):
-        res = []
-        if self.expr == 1:
-            op2 = "+1"
-        elif self.expr == -1:
-            op2 = "-1"
-        elif isinstance(self.expr, int):
-            res += ["@" + str(self.expr)]
-            op2 = "+A"
-        elif isinstance(self.expr, var):
-            res += ["@" + str(self.expr), "D=M"]
-            op2 = "+D"
-        else:
-            res += self.expr.code()  # Assume value in D
-            op2 = "+D"
-        res += ["@" + str(self.variable), "M=M"+op2]
-        return res
+    SYMBOL="+"
 
 class assign_sub(assign):
-    def code(self):
-        res = []
-        if self.expr == 1:
-            op2 = "-1"
-        elif self.expr == -1:
-            op2 = "+1"
-        elif isinstance(self.expr, int):
-            res += ["@" + str(self.expr)]
-            op2 = "-A"
-        elif isinstance(self.expr, var):
-            res += ["@" + str(self.expr), "D=M"]
-            op2 = "-D"
-        else:
-            res += self.expr.code()  # Assume value in D
-            op2 = "-D"
-        res += ["@" + str(self.variable), "M=M"+op2]
-        return res
+    SYMBOL="-"
 
+class assign_and(assign):
+    SYMBOL="&"
 
+class assign_or(assign):
+    SYMBOL="|"
 
 class block(ast):
     def extend(self, *args):
         self.lines.extend(args)
 
+
+class program(block):
+    def __init__(self, name, *args):
+        self.name = name 
+        self.lines = list(args) or []
+
 class subroutine(block):
     def __init__(self, name, *args, params=None):
         self.name = name 
         self.params = params
-        self.lines = args or []
+        self.lines = list(args) or []
 
 class while_loop(block):
-    def __init__(self, expr, *args):
-        self.expr = expr
+    def __init__(self, cond, *args):
+        self.cond = cond
         self.lines = list(args) or []
-
-    def code(self):
-        ll = label("while_loop", n=True)
-        ret = ["({})".format(str(ll))]
-        ret += if_goto(self.expr, str(ll)+'$end', reverse=True)
-        for line in self.lines:
-            ret += line.code()
-        ret += ["@"+str(ll), "0;JMP"]
-        ret += ['({}$end)'.format(str(ll))]
-        return ret
 
 class if_block(block):
-    def __init__(self, expr, *args):
-        self.expr = expr
+    def __init__(self, cond, *args):
+        self.cond = cond
         self.lines = list(args) or []
-
-    def code(self):
-        ll = label("if_block", n=True)
-        ret = ["({})".format(str(ll))]
-        ret += if_goto(self.expr, str(ll)+'$end', reverse=True)
-        for line in self.lines:
-            ret += line.code()
-        ret += ['({}$end)'.format(str(ll))]
-        return ret
-
 
 class for_list_loop(block):
     def __init__(self, var, items, *args):
@@ -136,27 +76,10 @@ class for_list_loop(block):
         self.items = items
         self.lines = args or []
 
-    def code(self):
-        ll = label("for_list_loop", n=True)
-        ret = ["// for {} in {}".format(self.var, self.items)]
-        ret += push_value(0) # terminator
-        for item in reversed(self.items):
-            ret += push_value(item)
-        ret += ["({})".format(str(ll))]
-        ret += pop_value("D")
-        ret += if_goto("D;JLE", str(ll)+'$end')
-        # value remains in D
-        ret += ["@" + str(self.var), "M=D"]
-        for line in self.lines:
-            ret += line.code()
-        ret += ["@"+str(ll), "0;JMP"]
-        ret += ['({}$end)'.format(str(ll))]
-        return ret
-
+@dataclass
 class expr(ast):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
+    left: ast
+    right: ast
 
     def __str__(self):
         return "{}{}{}".format(str(self.left), self.SYMBOL, str(self.right))
@@ -167,18 +90,17 @@ class add(expr):
 class sub(expr):
     SYMBOL = '-'
 
-class comp(ast):
-    def __init__(self, left, right=0):
-        self.left = left
-        self.right = right
+class _and(expr):
+    SYMBOL = '&'
 
-    def code(self):
-        if self.right != 0:
-            raise SpecificationException
-        if isinstance(self.left, var):
-            return [['@'+str(self.left), "D=M"], "J{}".format(self.__class__.__name__.upper())]
-        else:
-            return [self.left.code(), "J{}".format(self.__class__.__name__.upper())]
+class _or(expr):
+    SYMBOL = '|'
+
+@dataclass
+class comp(ast):
+    left: ast
+    right: ast = 0
+
 
 class gt(comp):
     pass
