@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+REGISTER = 0
 ARGUMENT = 1
 LOCAL = 2
 STATIC = 3
@@ -24,6 +25,12 @@ class var(ast):
         return self.name
 
 class argument(var):
+    pass
+
+class static(var):
+    pass
+
+class local(var):
     pass
 
 # @dataclass
@@ -58,12 +65,21 @@ class block(ast):
         self.lines.extend(args)
 
 @dataclass
+class asm(ast):
+    stmts: list = field(default_factory=list)
+
+@dataclass
 class program(block):
     name: str
     lines: list = field(default_factory=list)
 
 @dataclass
-class subroutine(block):
+class _class(block):
+    name: str
+    lines: list = field(default_factory=list)
+
+@dataclass
+class function(block):
     name: str
     args: list = field(default_factory=list)
     lines: list = field(default_factory=list)

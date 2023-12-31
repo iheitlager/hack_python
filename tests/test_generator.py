@@ -26,9 +26,9 @@ def test_assign_add():
     gen = g.hack_code_generator(vars={"_$i": [True, a.STATIC, 0, 0], "_$sum": [True, a.STATIC, 0, 0]})
     assert gen.generate(a.assign(a.var("sum"), a.add(a.var("sum"), a.var("i")))) == ['@i', 'D=M', '@sum', 'D=M+D', '@sum',  'M=D // sum=sum+i']
 
-def test_subroutine_header():
+def test_function_header():
     gen = g.hack_code_generator()
-    assert gen.generate(a.subroutine("test"))[:3] == ['', '// subroutine test starts here', '(test)']
+    assert gen.generate(a.function("test"))[:3] == ['', '// function _.test starts here', '(_.test)']
 
 def test_binop_code():
     ops = [a.sub, a.add, a._and, a._or]
@@ -49,6 +49,10 @@ def test_cond_jump():
         op_str = "D;J{}".format(op.__name__.upper())
         assert gen.gen_cond_jump(op(a.var("i")), 'if_loop', inverse=False) == ['@i', 'D=M', '@if_loop', op_str]
 
+def test_asm():
+    gen = g.hack_code_generator()
+    assert gen.generate(a.asm(stmts=['@10', 'D=A', '@0x4000', 'M=D'])) == ['@10', 'D=A', '@0x4000', 'M=D']
+
 def test_callsubroutine():
     gen = g.hack_code_generator()
     res = gen.generate(a.call_subroutine('bla'))
@@ -67,39 +71,45 @@ def test_while_comp():
 def test_generator():
     p = a.program('d2a')
 
-    r1 = a.subroutine("Main.main", lines=[
-        a.assign(a.var("i"), 0),
-        a.assign(a.var("sum"), 0),
-        a.while_loop(a.le(a.sub(a.var("i"), 100)), lines=[
-            a.assign_add(a.var("sum"), a.var("i")),
-            a.assign_add(a.var("i"), 1),
-            a.call_subroutine("print_i2a", args=[a.var("i")]),
-            a.assign(0x4000, 0x2d), # print '-''
-            a.call_subroutine("print_i2a", args=[a.var("sum")]),
-            a.assign(0x4000, 0x0a)] # print newline
-        ),
-        a.assign(0x5000, 0x0a) # ping
+    r1 = a._class("Main", lines = [
+        a.function("main", lines=[
+            a.static("i"),
+            a.static("sum"),
+            a.assign(a.var("i"), 0),
+            a.assign(a.var("sum"), 0),
+            a.while_loop(a.le(a.sub(a.var("i"), 100)), lines=[
+                a.assign_add(a.var("sum"), a.var("i")),
+                a.assign_add(a.var("i"), 1),
+                a.call_subroutine("Temp.print_i2a", args=[a.var("i")]),
+                a.assign(0x4000, 0x2d), # print '-''
+                a.call_subroutine("Temp.print_i2a", args=[a.var("sum")]),
+                a.asm(stmts=['@10', 'D=A', '@0x4000', 'M=D'])] # print newline
+            ),
+            a.assign(0x5000, 0x0a) # ping
+        ])
     ])
-
-    r2 = a.subroutine("print_i2a",
-        args=[a.argument("n")],
-        lines=[
-        a.assign(a.var("R9"), a.var("n")),
-        a.for_list_loop(a.var("R5"), items=[10000, 1000, 100, 10], lines=[
-            a.assign(a.var("R6"), a.var("R9")),
-            a.assign(a.var("R7"), 0),
-            a.assign(a.var("R8"), 0),
-            a.while_loop(a.ge(a.var("R6")), lines=[
-                a.assign_sub(a.var("R6"), a.var("R5")),
-                a.assign_add(a.var("R7"), 1),
-                a.assign_add(a.var("R8"), a.var("R5"))]),
-            a.if_block(a.gt(a.var("R7")), lines=[
-                a.assign_sub(a.var("R9"), a.var("R8")),
-                a.assign_add(a.var("R9"), a.var("R5")),
-                a.assign(0x4000, a.add(a.var('R7'), 47))])  # print char
-        ]),
-        a.assign(0x4000, a.add(a.var('R9'), 48))] # print last char
-    )
+    r2 = a._class("Temp", lines = [
+        a.function("print_i2a",
+            args=[a.argument("n")],
+            lines=[
+            a.local("out"),
+            a.assign(a.var("R9"), a.var("n")),
+            a.for_list_loop(a.var("R5"), items=[10000, 1000, 100, 10], lines=[
+                a.assign(a.var("R6"), a.var("R9")),
+                a.assign(a.var("R7"), 0),
+                a.assign(a.var("R8"), 0),
+                a.while_loop(a.ge(a.var("R6")), lines=[
+                    a.assign_sub(a.var("R6"), a.var("R5")),
+                    a.assign_add(a.var("R7"), 1),
+                    a.assign_add(a.var("R8"), a.var("R5"))]),
+                a.if_block(a.gt(a.var("R7")), lines=[
+                    a.assign_sub(a.var("R9"), a.var("R8")),
+                    a.assign_add(a.var("R9"), a.var("R5")),
+                    a.assign(0x4000, a.add(a.var('R7'), 47))])  # print char
+            ]),
+            a.assign(0x4000, a.add(a.var("R9"), 48)) # print last char
+        ])
+    ])
 
     p.extend(r1, r2)
 

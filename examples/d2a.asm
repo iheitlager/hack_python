@@ -6,12 +6,16 @@
     @Sys.init
     0;JMP
 
-// subroutine Main.main starts here
+// Class Main starts here
+
+// function Main.main starts here
 (Main.main)
+// i=0
     @i
-    M=0 // i=0
+    M=D
+// sum=0
     @sum
-    M=0 // sum=0
+    M=D
 (while_loop_1)
     @100
     D=A
@@ -25,7 +29,7 @@
     M=M+D // sum+=i
     @i
     M=M+1 // i+=1
-// calling print_i2a
+// calling Temp.print_i2a
     @i
     D=M
     @SP
@@ -33,7 +37,7 @@
     M=D
     @SP
     M=M+1
-    @print_i2a.RET_2
+    @Temp.print_i2a.RET_2
     D=A
     @SP
     A=M
@@ -76,14 +80,14 @@
     D=D-A
     @ARG
     M=D
-    @print_i2a
+    @Temp.print_i2a
     0;JMP
-(print_i2a.RET_2) // continue here after process call to print_i2a
+(Temp.print_i2a.RET_2) // continue here after process call to Temp.print_i2a
     @45
     D=A
     @16384
     M=D // 0x4000=45
-// calling print_i2a
+// calling Temp.print_i2a
     @sum
     D=M
     @SP
@@ -91,7 +95,7 @@
     M=D
     @SP
     M=M+1
-    @print_i2a.RET_3
+    @Temp.print_i2a.RET_3
     D=A
     @SP
     A=M
@@ -134,13 +138,13 @@
     D=D-A
     @ARG
     M=D
-    @print_i2a
+    @Temp.print_i2a
     0;JMP
-(print_i2a.RET_3) // continue here after process call to print_i2a
+(Temp.print_i2a.RET_3) // continue here after process call to Temp.print_i2a
     @10
     D=A
-    @16384
-    M=D // 0x4000=10
+    @0x4000
+    M=D
     @while_loop_1
     0;JMP
 (while_loop_1$end)
@@ -160,8 +164,6 @@
     M=D
     @ARG
     D=M
-    @0
-    D=D+A
     @R13
     M=D
     @SP
@@ -200,15 +202,18 @@
 // end Main.main
 
 
-// subroutine print_i2a starts here
-(print_i2a)
+// Class Temp starts here
+
+// function Temp.print_i2a starts here
+(Temp.print_i2a)
     @ARG
     D=M
     @0
     A=D+A
     D=M
+// R9=n
     @R9
-    M=D // R9=n
+    M=D
 // for R5 in [10000, 1000, 100, 10]
     @0
     D=A
@@ -257,12 +262,15 @@
     M=D
     @R9
     D=M
+// R6=R9
     @R6
-    M=D // R6=R9
+    M=D
+// R7=0
     @R7
-    M=0 // R7=0
+    M=D
+// R8=0
     @R8
-    M=0 // R8=0
+    M=D
 (while_loop_5)
     @R6
     D=M
@@ -309,7 +317,7 @@
     D=M+D
     @16384
     M=D // 0x4000=R9+48
-(print_i2a$end)
+(Temp.print_i2a$end)
     @LCL
     D=M
     @R14
@@ -321,8 +329,6 @@
     M=D
     @ARG
     D=M
-    @0
-    D=D+A
     @R13
     M=D
     @SP
@@ -358,7 +364,7 @@
     @R15
     A=M
     0;JMP // Return to caller
-// end print_i2a
+// end Temp.print_i2a
 
     @END
     0;JMP
@@ -413,12 +419,12 @@
 (END)
     @END
     0;JMP// Endloop
-// R5-[False, 0, 0, 5]
-// _$i-[False, 0, 0, 2]
-// _.Main.main$i-[False, 0, 0, 3]
-// _.Main.main$sum-[False, 0, 0, 2]
-// _.print_i2a$n-[True, 1, 0, 1]
+// _.Main.main$i-[True, 3, 0, 3]
+// _.Main.main$sum-[True, 3, 0, 2]
+// _.Temp.print_i2a$n-[True, 1, 0, 1]
+// _.Temp.print_i2a$out-[True, 2, 0, 0]
 // R9-[False, 0, 0, 4]
 // R6-[False, 0, 0, 2]
 // R7-[False, 0, 0, 2]
 // R8-[False, 0, 0, 3]
+// R5-[False, 0, 0, 3]

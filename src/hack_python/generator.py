@@ -52,14 +52,17 @@ class hack_code_generator:
     def __init__(self, vars={}):
         self.symtab_labels = {}
         self.symtab_vars = vars
-        self.context = ['_']
+        self.context = ["_"]
+        self.local_counter = 0
         self.label_n = 1
  
-    def push_context(self, name):
+    def push_context(self, name, local_counter=0):
         self.context.append(name)
+        self.local_counter = local_counter
 
-    def pop_context(self):
+    def pop_context(self, local_counter):
         self.context.pop()
+        self.local_counter = local_counter
 
     def _label(self, name, use=False, n=False):
         if n:
@@ -82,8 +85,9 @@ class hack_code_generator:
         
 
     def _var(self, name, segment=0, index=0, use=False):
-        if name not in HACK_REGISTERS:
-            # every var becomes globally unique
+        if name not in HACK_REGISTERS and name not in self.symtab_vars:
+            # every non static var becomes globally unique
+            # PS: we cannot reuse static varnames as local varnames
             ext_name = ".".join(self.context) + "$" + name
         else:
             ext_name= name
@@ -96,7 +100,9 @@ class hack_code_generator:
             else:
                 self.symtab_vars[ext_name] = [True, segment, index, 0]
         else:
-            if ext_name in self.symtab_vars:
+            if name in self.symtab_vars:
+                self.symtab_vars[name][3] += 1
+            elif ext_name in self.symtab_vars:
                 self.symtab_vars[ext_name][3] += 1
             else:
                 self.symtab_vars[ext_name] = [False, segment, index, 1]
@@ -118,10 +124,12 @@ class hack_code_generator:
         match type(item):
             case a.program:  # noqa: F841
                 res += self.gen_program(item)
+            case a._class:  # noqa: F841
+                res += self.gen_class(item)
             case a.call_subroutine:  # noqa: F841
                 res += self.gen_call_subroutine(item)
-            case a.subroutine:  # noqa: F841
-                res += self.gen_subroutine(item)
+            case a.function:  # noqa: F841
+                res += self.gen_function(item)
             case a.while_loop:  # noqa: F841
                 res += self.gen_while_loop(item)
             case a.if_block:  # noqa: F841
@@ -136,6 +144,10 @@ class hack_code_generator:
                 res += self.gen_assign_add(item)
             case a.var: # noqa: F841
                 res += self.gen_var(item)
+            case a.asm: # noqa: F841
+                res += item.stmts
+            case a.static | a.local: # noqa: F841
+                res += self.gen_declaration(item)
             # case int:
             #     res += ['@'+str(item), "D=A"]
             case _:
@@ -157,6 +169,31 @@ class hack_code_generator:
         res += ["(END)", "@END", "0;JMP// Endloop"]
         return res
 
+    def gen_class(self, item) -> list[str]:
+        old_counter = self.push_context(item.name)
+        res = ["", "// Class {} starts here".format(item.name)]
+        for line in item.lines:
+            res += self.visit(line)
+        self.pop_context(local_counter = old_counter)
+        return res
+
+
+    def gen_function(self, item) -> list[str]:
+        name = "{}.{}".format(self.context[-1], item.name)
+        old_counter = self.push_context(item.name)
+        for i in range(len(item.args)):
+            self._var(item.args[i].name, index=i, segment=a.ARGUMENT)
+        res = ["", "// function {} starts here".format(name)]
+        res += ["({})".format(self._label(name))]
+        for line in item.lines:
+            res += line.visit(self)
+        res += ["({}$end)".format(name)]  # include endlabel for routine
+        res += self.gen_return(item)
+
+        res += ["// end " + name, ""]
+        self.pop_context(local_counter = old_counter)
+        return res
+        
     def gen_call_subroutine(self, item) -> list[str]:
         res = ["// calling {}".format(item.name)]
         for arg in item.args: # push params
@@ -178,38 +215,22 @@ class hack_code_generator:
         return res
 
     def gen_return(self, item) -> list[str]:
-        ret = [
+        res = [
             '@LCL', 'D=M', '@R14', 'M=D', # R14 = LCL (Frame)
             # D still holds Frame
             '@5', 'A=D-A', 'D=M', '@R15', 'M=D', # Retaddress R15 = *(FRAME-5),
-            '@ARG', 'D=M', '@0', 'D=D+A', '@R13', 'M=D', '@SP', 'AM=M-1', 'D=M', '@R13', 'A=M', 'M=D', # *ARG = pop()
+            '@ARG', 'D=M', '@R13', 'M=D', '@SP', 'AM=M-1', 'D=M', '@R13', 'A=M', 'M=D', # *ARG = pop()
             '@ARG', 'D=M', '@SP', 'M=D+1' # SP = ARG + 1
         ]
         # restore registers
         for addr in ['@THAT', '@THIS', '@ARG', '@LCL']:
-            ret.extend([
+            res += [
                 '@R14', 'AMD=M-1', # 'D=M-1', 'AM=D'
                 'D=M', # D holds *(FRAME - (i+1))
                 addr, 'M=D'
-            ])
+            ]
         # R15 still holds return address
-        ret.extend(['@R15', 'A=M', '0;JMP // Return to caller'])
-        return ret
-
-
-    def gen_subroutine(self, item) -> list[str]:
-        self.push_context(item.name)
-        for i in range(len(item.args)):
-            self._var(item.args[i].name, index=i, segment=a.ARGUMENT)
-        res = ["", "// subroutine {} starts here".format(item.name)]
-        res += ["({})".format(self._label(item.name))]
-        for line in item.lines:
-            res += line.visit(self)
-        res += ["({}$end)".format(item.name)]  # include endlabel for routine
-        res += self.gen_return(item)
-
-        res += ["// end " + item.name, ""]
-        self.pop_context()
+        res += ['@R15', 'A=M', '0;JMP // Return to caller']
         return res
 
     def gen_while_loop(self, item) -> list[str]:
@@ -265,11 +286,14 @@ class hack_code_generator:
         if isinstance(item.variable, int):
             res += ["@" + str(item.variable), "M=" + op + " // 0x{:04X}={}".format(item.variable, str(item.expr))]
         else:
-            res += ["@" + self._var(item.variable.name, use=True), "M=" + op + " // {}={}".format(item.variable.name, str(item.expr))]
+            # res += ["@" + self._var(item.variable.name, use=True), "M=" + op + " // {}={}".format(item.variable.name, str(item.expr))]
+            res += ["// {}={}".format(item.variable.name, str(item.expr))]
+            res += self.gen_store_var(item.variable)
         return res
 
     def gen_assign_add(self, item) -> list[str]:
         res = []
+        op2 = "D"
         if item.expr == 1:
             op2 = "1"
         # elif item.expr == -1:
@@ -279,10 +303,8 @@ class hack_code_generator:
             op2 = "A"
         elif isinstance(item.expr, a.var):
             res += ["@" + self._var(item.expr.name, use=True), "D=M"]
-            op2 = "D"
         else:
             res += self.visit(item.expr)  # Assume value in D
-            op2 = "D"
         res += ["@" + self._var(item.variable.name, use=True), "M=M" + item.SYMBOL + op2 + " // {}{}={}".format(str(item.variable), item.SYMBOL, str(item.expr))]
         return res
 
@@ -320,6 +342,25 @@ class hack_code_generator:
             res = self.visit(item.left)  # Assume D
         return res
 
+    def gen_store_var(self, item) -> list[str]:
+        self._var(item.name, use=True)
+        if item.name in HACK_REGISTERS:
+            return ['@'+item.name, "M=D"]
+        else:
+            name = ".".join(self.context) + "$" + item.name
+            try:
+                spec = self.symtab_vars[name]
+            except KeyError:
+                raise a.SpecificationException("Unknown variable: " + item.name)
+            if spec[1] == a.ARGUMENT:
+                return ['@R15', 'M=D', '@ARG', 'D=M', '@'+str(spec[2]), 'D=D+A', '@R14', 'M=D', '@R15', 'D=M', '@R14', 'M=D']
+            elif spec[1] == a.LOCAL:
+                return ['@R15', 'M=D', '@LCL', 'D=M', '@'+str(spec[2]), 'D=D+A', '@R14', 'M=D', '@R15', 'D=M', '@R14', 'M=D']
+            elif spec[1] == a.STATIC:
+                return ['@'+item.name, 'M=D'] # Let the assembler resolve the symbol
+            else:
+                raise NotImplementedError
+
     def gen_var(self, item) -> list[str]:
         self._var(item.name, use=True)
         if item.name in HACK_REGISTERS:
@@ -332,8 +373,19 @@ class hack_code_generator:
                 raise a.SpecificationException("Unknown variable: " + item.name)
             if spec[1] == a.ARGUMENT:
                 return ['@ARG', 'D=M', '@'+str(spec[2]), 'A=D+A', 'D=M']
+            elif spec[1] == a.LOCAL:
+                return ['@LCL', 'D=M', '@'+str(spec[2]), 'A=D+A', 'D=M']
             elif spec[1] == a.STATIC:
                 return ['@'+item.name, 'D=M'] # Let the assembler resolve the symbol
             else:
                 raise NotImplementedError
 
+
+    def gen_declaration(self, item) -> list[str]:
+        match type(item):
+            case a.static:
+                self._var(item.name, segment=a.STATIC)
+            case a.local:
+                self._var(item.name, segment=a.LOCAL, index=self.local_counter)
+                self.local_counter += 1
+        return []
