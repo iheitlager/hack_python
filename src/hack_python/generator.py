@@ -102,6 +102,8 @@ class hack_code_generator:
         ret_label = item.name+"$ret"
         res = ["// calling {}".format(item.name)]
         res += push_value(ret_label)
+        for param in item.params:
+            res += push_value(param.name)
         res += ["@"+item.name, "0;JMP"]
         res += ["({})".format(ret_label)]
         return res
@@ -111,7 +113,10 @@ class hack_code_generator:
         res += ["({})".format(item.name)]
         for line in item.lines:
             res += line.visit(self)
-        res += ["({}$end)".format(item.name)] + pop_value("A") + ["0;JMP // Return to caller", "// end " + item.name, ""]
+        res += ["({}$end)".format(item.name)]
+        if len(item.params) > 0:
+            res += ['@'+str(len(item.params)), 'D=A', '@SP', 'M=M-D'] 
+        res += pop_value("A") + ["0;JMP // Return to caller", "// end " + item.name, ""]
         return res
 
     def gen_while_loop(self, item) -> list[str]:

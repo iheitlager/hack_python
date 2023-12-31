@@ -48,33 +48,32 @@ class block(ast):
     def extend(self, *args):
         self.lines.extend(args)
 
-
+@dataclass
 class program(block):
-    def __init__(self, name, *args):
-        self.name = name 
-        self.lines = list(args) or []
+    name: str
+    lines: list = field(default_factory=list)
 
+@dataclass
 class subroutine(block):
-    def __init__(self, name, *args, params=None):
-        self.name = name 
-        self.params = params
-        self.lines = list(args) or []
+    name: str
+    params: list = field(default_factory=list)
+    lines: list = field(default_factory=list)
 
+@dataclass
 class while_loop(block):
-    def __init__(self, cond, *args):
-        self.cond = cond
-        self.lines = list(args) or []
-
+    cond: ast
+    lines: list = field(default_factory=list)
+   
+@dataclass
 class if_block(block):
-    def __init__(self, cond, *args):
-        self.cond = cond
-        self.lines = list(args) or []
+    cond: ast
+    lines: list = field(default_factory=list)
 
+@dataclass
 class for_list_loop(block):
-    def __init__(self, var, items, *args):
-        self.var = var
-        self.items = items
-        self.lines = args or []
+    var: str
+    items: list = field(default_factory=list)
+    lines: list = field(default_factory=list)
 
 @dataclass
 class expr(ast):

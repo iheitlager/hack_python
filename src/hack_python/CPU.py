@@ -7,7 +7,6 @@ class IllegalOperand(Exception):
 
 
 class PC(Register):
-
     def get_inc(self):
         v = self.value
         self.value = (self.value + 1) & 0xFFFF

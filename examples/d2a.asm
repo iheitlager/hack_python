@@ -33,6 +33,13 @@
     M=D
     @SP
     M=M+1
+    @sum
+    D=A
+    @SP
+    A=M
+    M=D
+    @SP
+    M=M+1
     @print_i2a
     0;JMP
 (print_i2a$ret)
@@ -165,6 +172,10 @@
     @16384
     M=D // 0x4000=10
 (print_i2a$end)
+    @1
+    D=A
+    @SP
+    M=M-D
     @SP
     M=M-1
     @SP

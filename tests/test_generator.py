@@ -64,36 +64,36 @@ def test_while_comp():
 def test_generator():
     p = a.program('d2a')
 
-    r1 = a.subroutine("Main.main", 
+    r1 = a.subroutine("Main.main", lines=[
         a.assign(a.var("i"), 0),
         a.assign(a.var("sum"), 0),
-        a.while_loop(a.le(a.sub(a.var("i"), 100)), 
+        a.while_loop(a.le(a.sub(a.var("i"), 100)), lines=[
             a.assign_add(a.var("sum"), a.var("i")),
             a.assign_add(a.var("i"), 1),
-            a.call_subroutine("print_i2a", a.var("sum"))
+            a.call_subroutine("print_i2a", params=[a.var("sum")])]
         ),
-        a.assign(0x5000, 0x0a), # ping
-    )
+        a.assign(0x5000, 0x0a) # ping
+    ])
 
     r2 = a.subroutine("print_i2a",
+        params=[a.param("i")],
+        lines=[
         a.assign(a.var("R9"), a.var("sum")),
-        a.for_list_loop(a.var("R5"), [10000, 1000, 100, 10],
+        a.for_list_loop(a.var("R5"), items=[10000, 1000, 100, 10], lines=[
             a.assign(a.var("R6"), a.var("R9")),
             a.assign(a.var("R7"), 0),
             a.assign(a.var("R8"), 0),
-            a.while_loop(a.ge(a.var("R6")),
+            a.while_loop(a.ge(a.var("R6")), lines=[
                 a.assign_sub(a.var("R6"), a.var("R5")),
                 a.assign_add(a.var("R7"), 1),
-                a.assign_add(a.var("R8"), a.var("R5"))),
-            a.if_block(a.gt(a.var("R7")), 
+                a.assign_add(a.var("R8"), a.var("R5"))]),
+            a.if_block(a.gt(a.var("R7")), lines=[
                 a.assign_sub(a.var("R9"), a.var("R8")),
                 a.assign_add(a.var("R9"), a.var("R5")),
-                a.assign(0x4000, a.add(a.var('R7'), 47))  # print char
-            )
-        ),
+                a.assign(0x4000, a.add(a.var('R7'), 47))])  # print char
+        ]),
         a.assign(0x4000, a.add(a.var('R9'), 48)), # print last char
-        a.assign(0x4000, 0x0a), # print newline
-        params=a.param("i")
+        a.assign(0x4000, 0x0a)] # print newline
     )
 
     p.extend(r1, r2)
