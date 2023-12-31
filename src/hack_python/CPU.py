@@ -1,9 +1,138 @@
-from . import Register, Storage, RamSegment
+from . import INSTRUCTION_SET
 
 class IllegalOperand(Exception):
     "Raised when illegal operand is to be decoded"
     pass
 
+
+def create_mask(width):
+    return int('1'*width, 2)
+
+class ReadOnlyException(Exception):
+    """Exception raised when readonly memory is set"""
+    pass
+
+class WriteOnlyException(Exception):
+    """Exception raised when writeonly memory is read"""
+    pass
+
+
+def parse_rom(values, length, width=16):
+    mask = create_mask(width)
+    mem = [0x0000]*length
+    i = 0
+    for value in values[0:length]:
+        if isinstance(value, str):
+            value = value.strip()
+            value = int(value, 2)
+        mem[i] = value & mask
+        i+=1
+    return RomSegment(length, values=mem, width=width)
+
+class Segment:
+    def __init__(self, length, start=0, values=[], width=16):
+        self.start = start
+        self.length = length
+        self._mem = values
+        self.width = width
+        self._mask = create_mask(width)
+        self.reset()
+
+    def __getitem__(self, index):
+        if self.start:
+            if type(index) == slice:
+                index = slice(index.start-self.start, index.stop-self.start, index.step)
+            else:
+                index -= self.start
+        return self._mem[index]
+
+    def __setitem__(self, key, value):
+        raise ReadOnlyException("Memory segment write disabled")
+
+    def reset(self):
+        pass
+
+    def __len__(self):
+        return len(self._mem)
+
+    def __str__(self):
+        return '.{name:10s} start=0x{start:04X} length=0x{length:04X} ({size}k, {width}b)'.format(
+            name=self.__class__.__name__, start=self.start, length=self.length, 
+            size=(self.length + 1) // 1024, width=self.width // 8)
+
+
+class RomSegment(Segment):
+    pass
+
+class RamSegment(Segment):
+    def __setitem__(self, key, value):
+        if self.start:
+            key -= self.start
+        value &= self._mask
+        self._mem[key] = value
+        return value
+        
+    def reset(self):
+        self._mem = [0x0]*self.length
+
+
+class Storage:
+    def __init__(self, segments=[]):
+        self.segments = segments
+
+    def __getitem__(self, index):
+        if type(index) == slice:
+            for segment in self.segments:
+                if index.start >= segment.start and index.start <= segment.start + segment.length:
+                    return segment[index]
+        else:
+            for segment in self.segments:
+                try:
+                    return segment[index]
+                except IndexError:
+                    pass
+        raise IndexError("Memory Index not available")    
+
+    def __len__(self):
+        return sum(len(x) for x in self.segments)
+
+    def __setitem__(self, key, value):
+        # assume that main storage is always first segment
+        try:
+            self.segments[0][key] = value
+        except (IndexError, ReadOnlyException):
+            for segment in self.segments[1:]:
+                try:
+                    segment[key] = value
+                    return value
+                except (IndexError, ReadOnlyException):
+                    pass
+            raise IndexError("Memory Index not available")    
+
+    def reset(self):
+        for segment in self.segments:
+            segment.reset()
+
+    def __str__(self):
+        res = ""
+        for segment in self.segments:
+            res += str(segment) + "\n"
+        return res[:-1]
+
+class Register:
+    def __init__(self, width=16):
+        self.value = 0
+        self.width = create_mask(width)
+
+    def load(self, value):
+        self.value = value & self.width
+
+    def get(self):
+        return self.value
+
+    def reset(self):
+        self.value = 0
+        return self.value
 
 
 class PC(Register):
@@ -14,7 +143,7 @@ class PC(Register):
 
 
 class CPU:
-    def __init__(self, rom=None, callback=None, ram=None):
+    def __init__(self, rom=None, ram=None, callback=None):
         self.rom = rom          # instruction memory
         if not ram:
             ram = Storage(segments=[RamSegment(length=0x3FFF)])
@@ -24,49 +153,21 @@ class CPU:
         self.D = Register()
         self.callback = callback
         self.cycles = 0
-
+        self.instructions = {}
+        for opco in INSTRUCTION_SET:
+            self.instructions[opco[0]] = opco[2]
 
     def _decode(self, i):
         if i & 0x8000 == 0:     # A instr 0b14b13b12b11b10b9b8b7b6b5b4b3b2b1b0
             return (0, i & 0x7FFF)
-        else:                   # C instr 1x1x0a c5c4c3c3c2c0 d2d1d0 j2j1j0
-            return (i >> 12, ((i & 0b1111111000000) >> 6, (i & 0b111000) >> 3, i & 0b111))
+        else:                   # C instr 1x1x0a c1c2c3c4c5c6 d1d2d3 j1j2j3
+            return (i >> 12, ((i & 0b1111111_000_000) >> 6, (i & 0b111_000) >> 3, i & 0b111))
 
 
-    def _compute(self, comp):
-        if comp == 0b010_1010: return 0  # 0
-        elif comp == 0b011_1111: return 1  # 1
-        elif comp == 0b011_1010: return -1  # -1
-
-        # A,D instructions (a=0)
-        elif comp == 0b000_1100: return self.D.get()  # D
-        elif comp == 0b011_0000: return self.A.get()  # A
-        elif comp == 0b000_1101: return 0xFFFF ^ self.D.get()  # not D
-        elif comp == 0b011_0001: return 0xFFFF ^ self.A.get()  # not A
-        elif comp == 0b000_1111: return -self.D.get() & 0xFFFF  # -D
-        elif comp == 0b011_0011: return -self.A.get() & 0xFFFF  # -A
-        elif comp == 0b001_1111: return self.D.get() + 1  # D+1
-        elif comp == 0b011_0111: return self.A.get() + 1  # A+1
-        elif comp == 0b000_1110: return self.D.get() - 1  # D-1
-        elif comp == 0b011_0010: return self.A.get() - 1  # A-1
-        elif comp == 0b000_0010: return self.D.get() + self.A.get()  # D+A
-        elif comp == 0b001_0011: return self.D.get() - self.A.get()  # D-A
-        elif comp == 0b000_0111: return self.A.get() - self.D.get()  # A-D
-        elif comp == 0b000_0000: return self.D.get() & self.A.get()  # D&A
-        elif comp == 0b001_0101: return self.D.get() | self.A.get()  # D|A
-
-        # M instructions (a=1)
-        elif comp == 0b111_0000: return self.ram[self.A.get()]    # M
-        elif comp == 0b111_0001: return 0xFFFF ^ self.ram[self.A.get()]  # not M
-        elif comp == 0b111_0011: return -self.ram[self.A.get()] & 0xFFFF   # -M
-        elif comp == 0b111_0111: return self.ram[self.A.get()] + 1  # M+1
-        elif comp == 0b111_0010: return self.ram[self.A.get()] - 1  # M-1
-        elif comp == 0b100_0010: return self.D.get() + self.ram[self.A.get()]   # D+M
-        elif comp == 0b101_0011: return self.D.get() - self.ram[self.A.get()]   # D-M
-        elif comp == 0b100_0111: return self.ram[self.A.get()] - self.D.get()   # M-D
-        elif comp == 0b100_0000: return self.D.get() & self.ram[self.A.get()]   # D&M
-        elif comp == 0b101_0101: return self.D.get() | self.ram[self.A.get()]   # D|M
-        else: 
+    def _compute(self, opco):
+        try:
+            return self.instructions[opco](self)
+        except KeyError:
             raise IllegalOperand
 
     def _store(self, dest, value):
@@ -105,8 +206,11 @@ class CPU:
 
     def step(self):
         self.cycles += 1
-        op, operand = self._decode(self._fetch())
-        return self._execute(op, operand)
+        try:
+            op, operand = self._decode(self._fetch())
+            return self._execute(op, operand)
+        except TypeError:
+            print('Error in line: 0x{:04X}'.format(self.PC.get() - 1))
         
 
     def run(self):

@@ -1,7 +1,8 @@
-from hack_python import CPU, jump_options
+from hack_python import CPU, JUMP_OPTIONS
 
 def test_init():
     cpu = CPU.CPU()
+    assert len(cpu.instructions) == 28
     assert cpu.cycles == 0
     assert not cpu.run()
 
@@ -45,6 +46,6 @@ def test_store_in_cpu():
 def test_jump():
     cpu = CPU.CPU()
     vals = [1, 0, -1]
-    for operand, label, truths in jump_options:
+    for operand, label, truths in JUMP_OPTIONS:
         for i in range(3):
             assert cpu._jump(operand, vals[i]) == truths[i]

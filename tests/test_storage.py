@@ -1,6 +1,6 @@
 import pytest
-from hack_python import Storage, parse_rom, RamSegment
-from hack_python import ReadOnlyException
+from hack_python.CPU import Storage, parse_rom, RamSegment
+from hack_python.CPU import ReadOnlyException
 
 
 def test_rom_segment():

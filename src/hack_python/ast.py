@@ -1,5 +1,14 @@
 from dataclasses import dataclass, field
 
+ARGUMENT = 1
+LOCAL = 2
+STATIC = 3
+CONSTANT = 4
+THIS = 5
+THAT = 6
+POINTER = 7
+TEMP = 8
+
 class SpecificationException(Exception):
     pass
 
@@ -14,18 +23,18 @@ class var(ast):
     def __str__(self):
         return self.name
 
-class param(var):
+class argument(var):
     pass
 
-@dataclass
-class label(ast):
-    name: str
-    n: bool = field(default=False, compare=False, hash=False)
+# @dataclass
+# class label(ast):
+#     name: str
+#     n: bool = field(default=False, compare=False, hash=False)
 
 @dataclass
 class call_subroutine(ast):
     name: str
-    params: list = field(default_factory=list)
+    args: list = field(default_factory=list)
 
 @dataclass    
 class assign(ast):
@@ -56,7 +65,7 @@ class program(block):
 @dataclass
 class subroutine(block):
     name: str
-    params: list = field(default_factory=list)
+    args: list = field(default_factory=list)
     lines: list = field(default_factory=list)
 
 @dataclass

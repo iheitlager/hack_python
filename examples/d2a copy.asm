@@ -83,60 +83,6 @@
     D=A
     @16384
     M=D // 0x4000=45
-// calling print_i2a
-    @sum
-    D=M
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @print_i2a.RET_3
-    D=A
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @LCL
-    D=M
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @ARG
-    D=M
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @THIS
-    D=M
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @THAT
-    D=M
-    @SP
-    A=M
-    M=D
-    @SP
-    M=M+1
-    @SP
-    D=M
-    @LCL
-    M=D
-    @6
-    D=D-A
-    @ARG
-    M=D
-    @print_i2a
-    0;JMP
-(print_i2a.RET_3) // continue here after process call to print_i2a
     @10
     D=A
     @16384
@@ -245,13 +191,13 @@
     M=D
     @SP
     M=M+1
-(for_list_loop_4)
+(for_list_loop_3)
     @SP
     M=M-1
     @SP
     A=M
     D=M
-    @for_list_loop_4$end
+    @for_list_loop_3$end
     D;JLE
     @R5
     M=D
@@ -263,10 +209,10 @@
     M=0 // R7=0
     @R8
     M=0 // R8=0
-(while_loop_5)
+(while_loop_4)
     @R6
     D=M
-    @while_loop_5$end
+    @while_loop_4$end
     D;JLT
     @R5
     D=M
@@ -278,12 +224,12 @@
     D=M
     @R8
     M=M+D // R8+=R5
-    @while_loop_5
+    @while_loop_4
     0;JMP
-(while_loop_5$end)
+(while_loop_4$end)
     @R7
     D=M
-    @if_block_6
+    @if_block_5
     D;JLE
     @R8
     D=M
@@ -299,10 +245,10 @@
     D=M+D
     @16384
     M=D // 0x4000=R7+47
-(if_block_6)
-    @for_list_loop_4
+(if_block_5)
+    @for_list_loop_3
     0;JMP
-(for_list_loop_4$end)
+(for_list_loop_3$end)
     @48
     D=A
     @R9
@@ -363,7 +309,7 @@
     @END
     0;JMP
 (Sys.init)
-    @Main.main.RET_7
+    @Main.main.RET_6
     D=A
     @SP
     A=M
@@ -408,17 +354,16 @@
     M=D
     @Main.main
     0;JMP
-(Main.main.RET_7) // continue here after process call to Main.main
+(Main.main.RET_6) // continue here after process call to Main.main
 (Sys.init$end)
 (END)
     @END
     0;JMP// Endloop
-// R5-[False, 0, 0, 5]
-// _$i-[False, 0, 0, 2]
 // _.Main.main$i-[False, 0, 0, 3]
 // _.Main.main$sum-[False, 0, 0, 2]
 // _.print_i2a$n-[True, 1, 0, 1]
-// R9-[False, 0, 0, 4]
-// R6-[False, 0, 0, 2]
-// R7-[False, 0, 0, 2]
-// R8-[False, 0, 0, 3]
+// _.print_i2a$R9-[False, 0, 0, 4]
+// _.print_i2a$R6-[False, 0, 0, 2]
+// _.print_i2a$R7-[False, 0, 0, 2]
+// _.print_i2a$R8-[False, 0, 0, 3]
+// _.print_i2a$R5-[False, 0, 0, 3]

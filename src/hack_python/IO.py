@@ -1,4 +1,4 @@
-from . import Segment, WriteOnlyException
+from .CPU import Segment, WriteOnlyException
 import getch
 import sys
 

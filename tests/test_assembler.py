@@ -11,6 +11,10 @@ def test_lines():
     assert ass._translate_line("M=D+M").code  == 0b1111_0000_1000_1000     
     assert ass._translate_line("M=1+D").code  == 0b1110_0111_1100_1000     
 
+def test_opcodes_length():
+    ass = assemble.assembler()
+    assert len(ass.opcodes) == 37
+
 def test_store_in_assembler():
     ass = assemble.assembler()
     dis = disassemble.disassembler()
@@ -25,5 +29,7 @@ def test_store_in_assembler():
         assert dest == out2
 
 def test_jmp_in_assembler():
+    dis = disassemble.disassembler()
+    ass = assemble.assembler()
     for i in range(8):
-        assert i == assemble.jumpcodes[disassemble.jumpcodes[i]]
+        assert i == ass.jumpcodes[dis.jumpcodes[i]]

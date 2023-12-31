@@ -1,51 +1,22 @@
-from . import jump_options
-from hack_python.CPU import IllegalOperand
+from . import JUMP_OPTIONS, INSTRUCTION_SET
+from .CPU import IllegalOperand
 
 CBLUE = '\033[94m'
 CEND = '\033[0m'
 CRED = "\33[31m"
 
-opcodes = {
-        0b010_1010: "0",
-        0b011_1111: "1",
-        0b011_1010: "-1",
-
-        # A,D instructions (a=0)
-        0b000_1100: "D",
-        0b011_0000: "A",
-        0b000_1101: "!D",
-        0b011_0001: "!A",
-        0b000_1111: "-D",
-        0b011_0011: "-A",
-        0b001_1111: "D+1",
-        0b011_0111: "A+1",
-        0b000_1110: "D-1",
-        0b011_0010: "A-1",
-        0b000_0010: "D+A",
-        0b001_0011: "D-A",
-        0b000_0111: "A-D",
-        0b000_0000: "D&A",
-        0b001_0101: "D|A",
-
-        # M instructions (a=1)
-        0b111_0000: "M",
-        0b111_0001: "!M",
-        0b111_0011: "-M",
-        0b111_0111: "M+1",
-        0b111_0010: "M-1",
-        0b100_0010: "D+M",
-        0b101_0011: "D-M",
-        0b100_0111: "M-D",
-        0b100_0000: "D&M",
-        0b101_0101: "D|M"
-}
-
-jumpcodes = dict((x[0], x[1]) for x in jump_options)
 
 class disassembler:
     def __init__(self, verbose=False, binary=False):
         self.verbose = verbose
         self.binary = binary
+        self.jumpcodes = dict((x[0], x[1]) for x in JUMP_OPTIONS)
+        self.opcodes = {}
+        for opco in INSTRUCTION_SET:
+            if isinstance(opco[1], list):
+                self.opcodes[opco[0]] = opco[1][0]
+            else:
+                self.opcodes[opco[0]] = opco[1]
 
     def _decode(self, i):
         if i & 0x8000 == 0:     # A instr 0b14b13b12b11b10b9b8b7b6b5b4b3b2b1b0
@@ -70,9 +41,9 @@ class disassembler:
                 return "@0x{operand:04X}".format(operand=operand)
         else:              # C instruction
             try:
-                comp = opcodes[operand[0]]
+                comp = self.opcodes[operand[0]]
                 dest = self._store(operand[1])
-                jump = jumpcodes[operand[2]]
+                jump = self.jumpcodes[operand[2]]
                 if dest:
                     return dest+'='+comp
                 elif jump:

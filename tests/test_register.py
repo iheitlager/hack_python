@@ -1,4 +1,4 @@
-from hack_python import Register
+from hack_python.CPU import Register
 
 
 def test_init():

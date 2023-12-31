@@ -4,14 +4,14 @@ from hack_python import ast as a
 
 def test_var_code():
     gen = g.hack_code_generator()
-    assert gen.generate(a.var('i')) == ["i"]
+    assert gen.generate(a.var('R5')) == ['@R5', 'D=M']
 
 def test_assign_const():
     gen = g.hack_code_generator()
     assert gen.generate(a.assign(a.var('i'), 0)) == ["@i", "M=0 // i=0"]
 
 def test_assign_var():
-    gen = g.hack_code_generator()
+    gen = g.hack_code_generator(vars={"_$i": [True, a.STATIC, 0, 0], "_$j": [True, a.STATIC, 0, 0]})
     assert gen.generate(a.assign(a.var('i'), a.var('j'))) == ["@j", "D=M", "@i", "M=D // i=j"]
 
 def test_assign_code():
@@ -20,10 +20,10 @@ def test_assign_code():
 
 def test_add_var():
     gen = g.hack_code_generator()
-    assert gen.generate(a.add(a.var("sum"), a.var("i"))) == ['@i', 'D=M', '@sum', 'D=M+D']
+    assert gen.generate(a.add(a.var("R6"), a.var("R5"))) == ['@R5', 'D=M', '@R6', 'D=M+D']
 
 def test_assign_add():
-    gen = g.hack_code_generator()
+    gen = g.hack_code_generator(vars={"_$i": [True, a.STATIC, 0, 0], "_$sum": [True, a.STATIC, 0, 0]})
     assert gen.generate(a.assign(a.var("sum"), a.add(a.var("sum"), a.var("i")))) == ['@i', 'D=M', '@sum', 'D=M+D', '@sum',  'M=D // sum=sum+i']
 
 def test_subroutine_header():
@@ -51,7 +51,10 @@ def test_cond_jump():
 
 def test_callsubroutine():
     gen = g.hack_code_generator()
-    assert gen.generate(a.call_subroutine('bla')) == ['// calling bla', '@bla$ret', 'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1', '@bla', '0;JMP', '(bla$ret)']
+    res = gen.generate(a.call_subroutine('bla'))
+    assert res[0:8] == ['// calling bla', '@bla.RET_1', 'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1']
+    assert res[8:15] == ['@LCL', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1']
+    assert res[-3:] == ['@bla', '0;JMP', '(bla.RET_1) // continue here after process call to bla']
 
 def test_output(): 
     gen = g.hack_code_generator()
@@ -70,15 +73,18 @@ def test_generator():
         a.while_loop(a.le(a.sub(a.var("i"), 100)), lines=[
             a.assign_add(a.var("sum"), a.var("i")),
             a.assign_add(a.var("i"), 1),
-            a.call_subroutine("print_i2a", params=[a.var("sum")])]
+            a.call_subroutine("print_i2a", args=[a.var("i")]),
+            a.assign(0x4000, 0x2d), # print '-''
+            a.call_subroutine("print_i2a", args=[a.var("sum")]),
+            a.assign(0x4000, 0x0a)] # print newline
         ),
         a.assign(0x5000, 0x0a) # ping
     ])
 
     r2 = a.subroutine("print_i2a",
-        params=[a.param("i")],
+        args=[a.argument("n")],
         lines=[
-        a.assign(a.var("R9"), a.var("sum")),
+        a.assign(a.var("R9"), a.var("n")),
         a.for_list_loop(a.var("R5"), items=[10000, 1000, 100, 10], lines=[
             a.assign(a.var("R6"), a.var("R9")),
             a.assign(a.var("R7"), 0),
@@ -92,8 +98,7 @@ def test_generator():
                 a.assign_add(a.var("R9"), a.var("R5")),
                 a.assign(0x4000, a.add(a.var('R7'), 47))])  # print char
         ]),
-        a.assign(0x4000, a.add(a.var('R9'), 48)), # print last char
-        a.assign(0x4000, 0x0a)] # print newline
+        a.assign(0x4000, a.add(a.var('R9'), 48))] # print last char
     )
 
     p.extend(r1, r2)
@@ -102,5 +107,7 @@ def test_generator():
     gen = g.hack_code_generator()
     for line in g.pprint(gen.generate(p)):
         f.write(line)
+    for var, spec in gen.symtab_vars.items():
+        f.write("// {}-{}\n".format(var, spec))
     f.close()
     assert p.name == 'd2a'

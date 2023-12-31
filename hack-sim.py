@@ -2,10 +2,9 @@ import argparse
 import sys
 import os
 import readline  # noqa: F401
-from hack_python import (
-    CPU, Storage, RamSegment, parse_rom,
-    IO, disassemble
-)
+from hack_python import IO, disassemble
+from hack_python.CPU import CPU, Storage, RamSegment, parse_rom
+
 
 
 CRED = '\33[31m'
@@ -124,8 +123,8 @@ class simulator:
         print("")
         for w in self.watch:
             print(("{w:04X} " + CYELLOW + "{v:04X}" + CEND).format(w=w, v=cpu.ram[w]))
-        print("PC     A      D      OPCO   ({cycles:d})".format(cycles=cpu.cycles))
-        print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), opco=opco, instr=self.dis.disass_instr(opco)))
+        print("PC     A      D      SP     LCL    ARG    OPCO   ({cycles:d})".format(cycles=cpu.cycles))
+        print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{SP:04X} 0x{LCL:04X} 0x{ARG:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), SP=cpu.ram[0], LCL=cpu.ram[1], ARG=cpu.ram[2], opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
 
     def _readinput(self, cpu, pc):
@@ -180,7 +179,7 @@ def main():
 
     sim = simulator(verbose=args.verbose)
     ram = Storage(segments=[RamSegment(length=0x3FFF), IO.KeyboardSegment(start=0x6000), OUTPUT[args.output](start=0x4000), IO.PingSegment(start=0x5000)])
-    cpu = CPU.CPU(rom=rom, ram=ram, callback=sim.step)
+    cpu = CPU(rom=rom, ram=ram, callback=sim.step)
 
     if args.verbose:
         print('Hack simulator started, rom loaded with %d opcodes' % len(lines))

@@ -1,57 +1,8 @@
 import re
 import sys
 
-from . import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, jump_options
-
-class IllegalOperand(Exception):
-    "Raised when illegal operand is to be decoded"
-    pass
-
-opcodes = {
-    "0": 0b0101010,
-    "1": 0b0111111,
-    "-1": 0b0111010,
-
-    # A,D instructions (a=0)
-    "D": 0b0001100,
-    "A": 0b0110000,
-    "!D": 0b0001101,
-    "!A": 0b0110001,
-    "-D": 0b0001111,
-    "-A": 0b0110011,
-    "D+1": 0b0011111,
-    "1+D": 0b0011111,  # commutative
-    "A+1": 0b0110111,
-    "1+A": 0b0110111,  # commutative
-    "D-1": 0b0001110,
-    "A-1": 0b0110010,
-    "D+A": 0b0000010,
-    "A+D": 0b0000010,  # commutative
-    "D-A": 0b0010011,
-    "A-D": 0b0000111,
-    "D&A": 0b0000000,
-    "A&D": 0b0000000,  # commutative
-    "D|A": 0b0010101,
-    "A|D": 0b0010101,  # commutative
-
-    # M instructions (a=1)
-    "M": 0b1110000,
-    "!M": 0b1110001,
-    "-M": 0b1110011,
-    "M+1": 0b1110111,
-    "1+M": 0b1110111,  # commutative
-    "M-1": 0b1110010,
-    "D+M": 0b1000010,
-    "M+D": 0b1000010,  # commutative
-    "D-M": 0b1010011,
-    "M-D": 0b1000111,
-    "D&M": 0b1000000,
-    "M&D": 0b1000000,  # commutative
-    "D|M": 0b1010101,
-    "M|D": 0b1010101   # commutative
-}
-
-jumpcodes = dict((x[1], x[0]) for x in jump_options)
+from . import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, JUMP_OPTIONS, INSTRUCTION_SET
+from .CPU import IllegalOperand
 
 def to_int(value):
     if value[0:2] == '0b': return int(value, 2)
@@ -64,14 +15,15 @@ class code_line:
                  a_value=None,
                  dest=None, comp=None, jump=None
                  ):
-            self.raw = line
-            self.address = address
-            self.code = code
-            self.label = label
-            self.a_value = a_value
-            self.dest = dest
-            self.comp = comp
-            self.jump = jump
+        self.raw = line
+        self.address = address
+        self.code = code
+        self.label = label
+        self.a_value = a_value
+        self.dest = dest
+        self.comp = comp
+        self.jump = jump
+
 
     def __str__(self):
         return "{address:04x}: {raw}".format(**self.__dict__)
@@ -83,6 +35,14 @@ class assembler:
         self.assembling = True
         self.address = 0x0000  
         self.debug = debug
+        self.jumpcodes = dict((x[1], x[0]) for x in JUMP_OPTIONS)
+        self.opcodes = {}
+        for opco in INSTRUCTION_SET:
+            if isinstance(opco[1], list):
+                for _label in opco[1]:
+                    self.opcodes[_label] = opco[0]
+            else:
+                self.opcodes[opco[1]] = opco[0]
 
     def pass_one(self, lines):
         '''scan, set linenumbers and create symbol table'''
@@ -147,16 +107,15 @@ class assembler:
             try:
                 code = self._translate_opcode(m[1], m[2], m[3])
             except KeyError:
-                print(line, self.address)
-                raise IllegalOperand
+                raise IllegalOperand(line)
 
             return code_line(line, address=self.address, dest=m[1], comp=m[2], jump=m[3], code=code)
     
     def _translate_opcode(self, dest, comp, jump):
         vars = {
-            "comp": opcodes[dest if jump else comp], # hack for regex
+            "comp": self.opcodes[dest if jump else comp], # hack for regex
             "dest": 0 if jump else self._store(dest), # another hack for regex
-            "jump": jumpcodes[jump]
+            "jump": self.jumpcodes[jump]
         }
         return int("0b111{comp:07b}{dest:03b}{jump:03b}".format(**vars), 2)
 
