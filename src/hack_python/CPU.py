@@ -178,13 +178,13 @@ class CPU:
 
     def _jump(self, jump, ng, nz):
         if jump == 0: return False
-        elif jump == 7: return True  # JMP
-        if jump == 1 and not ng and nz: return True  # JGT
-        elif jump == 2 and not nz: return True  # JEQ
-        elif jump == 3 and not ng: return True  # JGE
-        elif jump == 4 and ng and nz: return True  # JLT
-        elif jump == 5 and nz: return True  # JNE
-        elif jump == 6 and not (not ng and nz): return True  # JLE
+        elif jump == 0b111: return True  # JMP
+        if jump == 0b001 and not ng and nz: return True  # JGT
+        elif jump == 0b010 and not nz: return True  # JEQ
+        elif jump == 0b011 and not ng: return True  # JGE
+        elif jump == 0b100 and ng and nz: return True  # JLT
+        elif jump == 0b101 and nz: return True  # JNE
+        elif jump == 0b110 and not (not ng and nz): return True  # JLE
         # elif jump == 6 and (ng or not nz): return True  # JLE
         return False
 

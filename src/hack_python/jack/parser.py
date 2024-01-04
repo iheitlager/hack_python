@@ -29,14 +29,7 @@ class Parser:
             'VAR': 'LOCAL',
             'FIELD': 'THIS'
         }
-
-    def _accept_advance(self, token):
-        curr_token = self.tokenizer.curr_token
-        if curr_token == token:
-            self.tokenizer.advance()
-            return True
-        raise SyntaxError("Token {} expected, got {}".format(token, curr_token))
-
+        
     def parse(self, raw_code):
         """Start Jack parsing"""
         self.tk.tokenize(raw_code)
@@ -47,7 +40,7 @@ class Parser:
             if self.tk.has_more_tokens:
                 self.tk.advance()
         if not _parsed:
-            raise SyntaxError("'class' expected, got '{}'".format(self.tokenizer.curr_token))
+            raise SyntaxError("'class' expected, got '{}'".format(self.tk.curr_token))
 
     def compile_class(self):
         """Compiles a Jack class to VM file.
