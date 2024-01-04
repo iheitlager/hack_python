@@ -419,6 +419,8 @@
 (END)
     @END
     0;JMP// Endloop
+// R5-[False, 0, 0, 5]
+// _$i-[False, 0, 0, 2]
 // _.Main.main$i-[True, 3, 0, 3]
 // _.Main.main$sum-[True, 3, 0, 2]
 // _.Temp.print_i2a$n-[True, 1, 0, 1]
@@ -427,4 +429,3 @@
 // R6-[False, 0, 0, 2]
 // R7-[False, 0, 0, 2]
 // R8-[False, 0, 0, 3]
-// R5-[False, 0, 0, 3]

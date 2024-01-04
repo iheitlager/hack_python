@@ -1,11 +1,7 @@
-from . import INSTRUCTION_SET
-
-class IllegalOperand(Exception):
-    "Raised when illegal operand is to be decoded"
-    pass
-
+from . import INSTRUCTION_SET, IllegalOperand
 
 def create_mask(width):
+    '''creates a bit mask for word length'''
     return int('1'*width, 2)
 
 class ReadOnlyException(Exception):

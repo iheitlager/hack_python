@@ -6,6 +6,14 @@ def test_init():
     assert cpu.cycles == 0
     assert not cpu.run()
 
+
+def test_registers():
+    cpu = CPU.CPU()
+    cpu.A.load(10)
+    cpu.D.load(20)
+    assert cpu.A.get() == 10
+    assert cpu.D.get() == 20
+
 def test_decode_a_instruction():
     cpu = CPU.CPU(rom=None)
     assert cpu._decode(0x0010) == (0, 16)
