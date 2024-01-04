@@ -35,5 +35,3 @@ def test_reset():
     p = pc.reset()
     assert p == 0
     assert pc.get() == 0
-
-

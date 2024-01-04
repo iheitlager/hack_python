@@ -1,4 +1,4 @@
-from . import INSTRUCTION_SET, IllegalOperand
+from . import INSTRUCTION_SET, HACK_MASK, IllegalOperand
 
 def create_mask(width):
     '''creates a bit mask for word length'''
@@ -173,17 +173,16 @@ class CPU:
         if dest & 0b10: self.D.load(value)  # D=
         if dest & 0b100: self.A.load(value)  # A=  NB: comes last because of M=
 
-    def _jump(self, jump, comp):
+    def _jump(self, jump, ng, nz):
         if jump == 0: return False
         elif jump == 7: return True  # JMP
-        if comp > 0x7FFF:  # refactor this to comp
-            comp = (-(comp^0xFFFF)-1) 
-        if jump == 1 and comp > 0: return True  # JGT
-        elif jump == 2 and comp == 0: return True  # JEQ
-        elif jump == 3 and comp >= 0: return True  # JGE
-        elif jump == 4 and comp < 0: return True  # JLT
-        elif jump == 5 and comp != 0: return True  # JNE
-        elif jump == 6 and comp <= 0: return True  # JLE
+        if jump == 1 and not ng and nz: return True  # JGT
+        elif jump == 2 and not nz: return True  # JEQ
+        elif jump == 3 and not ng: return True  # JGE
+        elif jump == 4 and ng and nz: return True  # JLT
+        elif jump == 5 and nz: return True  # JNE
+        elif jump == 6 and not (not ng and nz): return True  # JLE
+        # elif jump == 6 and (ng or not nz): return True  # JLE
         return False
 
     def _execute(self, op, operand):
@@ -191,8 +190,10 @@ class CPU:
             self.A.load(operand)
         else:               # C instruction
             alu = self._compute(operand[0])
+            ng = alu & 0x8000
+            nz = alu & 0xFFFF
             self._store(operand[1], alu)
-            if self._jump(operand[2], alu):
+            if self._jump(operand[2], ng, nz):
                 self.PC.load(self.A.get())
         return True
 
