@@ -33,7 +33,8 @@ ARRAY_TEST = '''class Main {
 }'''
 
 def test_tokenizer():
-    tok = Tokenizer(ARRAY_TEST.split('\n'))
-    for i, tk in enumerate(tok.tokens):
-        print(i, tk)
-    assert tk == '}'
+	tok = Tokenizer()
+	tok.tokenize(ARRAY_TEST)
+	for i, tk in enumerate(tok.tokens):
+		print(i, tk)
+	assert tk == '}'

@@ -162,9 +162,12 @@ class CPU:
 
     def _compute(self, opco):
         try:
-            return self.instructions[opco](self)
+            alu = self.instructions[opco](self)
         except KeyError:
             raise IllegalOperand
+        ng = alu & 0x8000
+        nz = alu & 0xFFFF
+        return alu, ng, nz
 
     def _store(self, dest, value):
         # Note we can store three targets (M,D,A) at once!
@@ -189,9 +192,7 @@ class CPU:
         if op == 0:         # A instruction
             self.A.load(operand)
         else:               # C instruction
-            alu = self._compute(operand[0])
-            ng = alu & 0x8000
-            nz = alu & 0xFFFF
+            alu, ng, nz = self._compute(operand[0])
             self._store(operand[1], alu)
             if self._jump(operand[2], ng, nz):
                 self.PC.load(self.A.get())

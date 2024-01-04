@@ -70,7 +70,7 @@ def test_compute():
         cpu.D.load(t[2])
         if 'M' in t[0]:
             cpu.ram[cpu.A.get()] = t[3]
-        assert cpu._compute(opco[t[0]]) & HACK_MASK == t[4]
+        assert cpu._compute(opco[t[0]])[0] & HACK_MASK == t[4]
 
 def test_ramrom():
     # ram and rom can be mocked with lists (__getitem__ is required)

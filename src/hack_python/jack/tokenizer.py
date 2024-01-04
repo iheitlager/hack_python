@@ -18,7 +18,7 @@ class Tokenizer:
     """A tokenizer to tokenize a Jack source file.
     """
 
-    def __init__(self, raw_code):
+    def __init__(self):
         """Turns input raw code to a list of tokens
         
         Args:
@@ -27,24 +27,30 @@ class Tokenizer:
 
         self.current_token_index = 0
         self.tokens = []
-        clean_code = Tokenizer.clean_code(raw_code)
+    
+    def tokenize(self, raw_code):
+        clean_code = clean_raw_code(raw_code)
         for line in clean_code:
-            self.tokens.extend(Tokenizer.handle_line(line))
+            self.tokens.extend(handle_line(line))
         
         self.total_tokens = len(self.tokens)
-    
-    def advance(self):
+
+    def advance(self, token=None):
         """Advance the token pointer by one. Throws error if no more tokens."""
 
-        if self.has_more_tokens():
+        if token and self.curr_token not in token:
+            raise SyntaxError("Expected token '{}' got '{}'.".format(token, self.curr_token))
+        if self.has_more_tokens:
             self.current_token_index += 1
         else:
             raise IndexError('No more tokens.')
     
+    @property
     def has_more_tokens(self):
         """Check if there are more tokens available."""
         return self.current_token_index < (self.total_tokens - 1)
     
+    @property
     def token_type(self):
         """Returns the token type. 
         
@@ -67,105 +73,6 @@ class Tokenizer:
         else:
             raise SyntaxError('Invalid token : {}'.format(token))
         return symbol_type      
-
-    @staticmethod
-    def handle_line(line):
-        """Converts a line of clean code to a list of tokens.
-        Required so that I can tokenize string constants without 
-        using re.Scanner. 
-        May need to later add token type here instead of parser.         
-        
-        Args:
-            line (string): Line of clean Jack code. 
-        
-        Returns:
-            list: a list of valid Jack tokens. 
-        """
-
-        line = line.strip()
-        ret = []
-        if '"' in line:
-            match = re.search(r"(\".*?\")", line)
-            ret.extend(Tokenizer.handle_line(match.string[:match.start()]))
-            ret.append(match.string[match.start():match.end() - 1])
-            ret.extend(Tokenizer.handle_line(match.string[match.end():]))
-        else:
-            for candidate in line.split():
-                ret.extend(Tokenizer.handle_token_candidate(candidate))
-        return ret
-
-    @staticmethod
-    def handle_token_candidate(candidate):
-        """Cleans and handles a possible token
-        
-        Args:
-            candidate (string): A candidate for token (which 
-            can consist of multiple tokens)
-        
-        Returns:
-            list: a list of tokens
-        """  
-
-        if not candidate:
-            return []
-        ret = []
-        match = re.search(
-            r"([\&\|\(\)<=\+\-\*>\\/.;,\[\]}{~])", candidate.strip()
-        )
-        if match is not None:
-            ret.extend(Tokenizer.handle_token_candidate(
-                match.string[:match.start()]
-            ))
-            ret.append(match.string[match.start()])
-            ret.extend(Tokenizer.handle_token_candidate(
-                match.string[match.end():]
-            ))
-        else:
-            ret.append(candidate)
-
-        return ret
-
-    @staticmethod
-    def clean_code(raw_code):
-        """ Removes comments and newlines from the input raw code.
-        
-        Args:
-            raw_code (list): A list (str) of unclean code from the file.
-        
-        Returns:
-            list: A list (str) of clean code.
-        """
-
-        lines = []
-        comment_on = False
-        for line in raw_code:
-            line = line.strip()
-            if line.startswith('/*') and (not line.endswith('*/')):
-                comment_on = True
-            
-            if not comment_on:
-                lines.append(line)
-
-            if line.startswith('*/') or line.endswith('*/'):
-                comment_on = False
-
-        lines = [line.split('//')[0].strip() for line in lines 
-                 if Tokenizer.is_valid(line)]
-        return lines
-    
-    @staticmethod
-    def is_valid(line):
-        """Is it a valid Jack line?
-        
-        Args:
-            line (str): A line from Jack file. 
-        
-        Returns:
-            bool: Is it a valid Jack line?
-        """
-
-        return line and (not line.startswith('//')) and (
-            not line.startswith('/*'))
 
     @property
     def curr_token(self):
@@ -192,6 +99,103 @@ class Tokenizer:
 
         if self.current_token_index > 0:
             return self.tokens[self.current_token_index - 1]
+
+def handle_line(line):
+    """Converts a line of clean code to a list of tokens.
+    Required so that I can tokenize string constants without 
+    using re.Scanner. 
+    May need to later add token type here instead of parser.         
+    
+    Args:
+        line (string): Line of clean Jack code. 
+    
+    Returns:
+        list: a list of valid Jack tokens. 
+    """
+
+    line = line.strip()
+    ret = []
+    if '"' in line:
+        match = re.search(r"(\".*?\")", line)
+        ret.extend(handle_line(match.string[:match.start()]))
+        ret.append(match.string[match.start():match.end() - 1])
+        ret.extend(handle_line(match.string[match.end():]))
+    else:
+        for candidate in line.split():
+            ret.extend(handle_token_candidate(candidate))
+    return ret
+
+def handle_token_candidate(candidate):
+    """Cleans and handles a possible token
+    
+    Args:
+        candidate (string): A candidate for token (which 
+        can consist of multiple tokens)
+    
+    Returns:
+        list: a list of tokens
+    """  
+
+    if not candidate:
+        return []
+    ret = []
+    match = re.search(
+        r"([\&\|\(\)<=\+\-\*>\\/.;,\[\]}{~])", candidate.strip()
+    )
+    if match is not None:
+        ret.extend(handle_token_candidate(
+            match.string[:match.start()]
+        ))
+        ret.append(match.string[match.start()])
+        ret.extend(handle_token_candidate(
+            match.string[match.end():]
+        ))
+    else:
+        ret.append(candidate)
+
+    return ret
+
+def clean_raw_code(raw_code):
+    """ Removes comments and newlines from the input raw code.
+    
+    Args:
+        raw_code (list): A list (str) of unclean code from the file.
+    
+    Returns:
+        list: A list (str) of clean code.
+    """
+
+    lines = []
+    comment_on = False
+    raw_code = raw_code.split('\n')
+    for line in raw_code:
+        line = line.strip()
+        if line.startswith('/*') and (not line.endswith('*/')):
+            comment_on = True
+        
+        if not comment_on:
+            lines.append(line)
+
+        if line.startswith('*/') or line.endswith('*/'):
+            comment_on = False
+
+    lines = [line.split('//')[0].strip() for line in lines 
+                if is_valid(line)]
+    return lines
+
+
+def is_valid(line):
+    """Is it a valid Jack line?
+    
+    Args:
+        line (str): A line from Jack file. 
+    
+    Returns:
+        bool: Is it a valid Jack line?
+    """
+
+    return line and (not line.startswith('//')) and (
+        not line.startswith('/*'))
 
 
 
