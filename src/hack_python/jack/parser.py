@@ -384,11 +384,11 @@ class Parser:
             SyntaxError: Unexpected input
         """
 
-        exprs = [self.compile_expression()]
 
         if self.tk.curr_token == ')':
-            return exprs
-        
+            return []
+
+        exprs = [self.compile_expression()]
 
         while self.tk.curr_token != ')':
             self.tk.advance(",")  # ","
@@ -460,9 +460,9 @@ class Parser:
             else:
                 self.generator.write_arithmetic('NOT')
         elif self.tk.curr_token == '(':
-            self.tk.advance()  # "("
+            self.tk.advance("(")  # "("
             term=self.compile_expression()
-            self.tk.advance()  # ")"
+            self.tk.advance(")")  # ")"
         else:
             if self.tk.token_type != t.IDENTIFIER:
                     raise SyntaxError('{} is not a valid identifier.'
@@ -499,7 +499,7 @@ class Parser:
             self.tk.advance()
 
             _type, cat, i = self.symbol_table.get(var_name)
-            if _type != None:  # it's an instance
+            if _type is not None:  # it's an instance
                 cat = self.convert_kind[cat]
                 self.generator.write_push_pop('push', cat, i)
                 func_name = "{}.{}".format(_type, sub_name)

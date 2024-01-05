@@ -83,7 +83,7 @@ class Tokenizer:
         Returns:
             str: Current token
         """
-
+        print(self.tokens[self.current_token_index])
         return self.tokens[self.current_token_index]
     
     @property
