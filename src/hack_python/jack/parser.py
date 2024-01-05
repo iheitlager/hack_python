@@ -299,19 +299,20 @@ class Parser:
         self.if_count += 1
 
         self.tk.advance("{")  # "{"
-        self.compile_statements()
+        lines = self.compile_statements()
         self.generator.write_goto(l3)
         self.tk.advance("}")  # "}"
         self.generator.write_label(l2)
 
+        else_lines = []
         if self.tk.curr_token == 'else':
             self.tk.advance("else")  # "else"
             self.tk.advance("{")  # "{"
-            self.compile_statements()
+            else_lines += self.compile_statements()
             self.tk.advance("}")  # "}"
         
         self.generator.write_label(l3)
-        return a._if(0)
+        return a._if(0, lines=lines, else_lines=else_lines)
     
     def compile_while_statement(self):
         """Compiles a Jack "while" statement.
@@ -330,12 +331,12 @@ class Parser:
         self.tk.advance("{")  # "{"
 
         self.generator.write_ifgoto(l2)
-        self.compile_statements()
+        lines = self.compile_statements()
         self.generator.write_goto(l1)
         self.generator.write_label(l2)
 
         self.tk.advance("}")  # "}"
-        return a._while(0)
+        return a._while(0, lines=lines)
     
     def compile_do_statement(self):
         """Compiles a Jack "do" statement.

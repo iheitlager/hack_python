@@ -65,6 +65,7 @@ class _while(block):
 class _if(block):
     expr: ast
     lines: list = field(default_factory=list)
+    else_lines: list = field(default_factory=list)
 
 @dataclass
 class _do(block):
