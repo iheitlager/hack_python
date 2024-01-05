@@ -8,6 +8,8 @@ SYMBOL=2
 INT_CONST=3
 STRING_CONST=4
 IDENTIFIER=5
+BOOLEAN=6
+POINTER=7
 
 _KEYWORDS= ('class', 'constructor', 'function', 'method', 
                      'field', 'static', 'var', 'int', 'char', 'if',

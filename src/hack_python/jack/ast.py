@@ -70,3 +70,30 @@ class _if(block):
 class _do(block):
     name: str
     exprs: list = field(default_factory=list)
+
+@dataclass
+class bin_expr(ast):
+    l_term: ast
+    op: str
+    r_term: ast
+
+@dataclass
+class unary_expr(ast):
+    op: str
+    term: ast
+
+@dataclass
+class term(ast):
+    type: str
+    value: str
+
+@dataclass
+class indexed_var(ast):
+    name: str
+    index: ast
+
+@dataclass
+class _var(ast):
+    name: str
+    type: str
+    cat: str

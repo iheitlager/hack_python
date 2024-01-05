@@ -30,16 +30,16 @@ class Parser:
             'FIELD': 'THIS'
         }
         
-    def parse(self, raw_code):
+    def compile(self, raw_code):
         """Start Jack parsing"""
         self.tk.tokenize(raw_code)
-        _parsed = False
+        _compiled = False
         while self.tk.curr_token == 'class':
-            _parsed = True
+            _compiled = True
             self.ast.append(self.compile_class())
             if self.tk.has_more_tokens:
                 self.tk.advance()
-        if not _parsed:
+        if not _compiled:
             raise SyntaxError("'class' expected, got '{}'".format(self.tk.curr_token))
 
     def compile_class(self):
@@ -377,40 +377,42 @@ class Parser:
         """Compiles a Jack expression list.
 
         Returns:
-            n_args (int): Number of arguments for subroutine call
+            exprs (list): list of expressions
         
         Raises:
             SyntaxError: Unexpected input
         """
 
-        n_args = 0
+        exprs = [self.compile_expression()]
 
         if self.tk.curr_token == ')':
-            return n_args
+            return exprs
         
-        self.compile_expression()
-        n_args += 1
 
         while self.tk.curr_token != ')':
             self.tk.advance(",")  # ","
-            self.compile_expression()
-            n_args += 1
+            exprs.append(self.compile_expression())
         
-        return n_args
+        return exprs
  
     def compile_expression(self):
         """Compiles a Jack expression.
         """
 
-        self.compile_term()
+        l_term = self.compile_term()
 
+        expr = None
         while self.tk.curr_token in (
             '+', '-', '*', '/', '&', '|', '<', '>', '='
         ):
             op = self.tk.curr_token
             self.tk.advance()
 
-            self.compile_term()
+            r_term = self.compile_term()
+            if not expr:
+                expr = a.bin_expr(l_term=l_term, op=op, r_term=r_term)
+            else:
+                expr = a.bin_expr(l_term=expr, op=op, r_term=r_term)
             if op in self.op_table:
                 self.generator.write_arithmetic(self.op_table.get(op))
             elif op == '*':
@@ -419,7 +421,9 @@ class Parser:
                 self.generator.write_call('Math.divide', 2)
             else:
                 raise ValueError("{} not supported op.".format(op))
+        return expr
 
+                
     def compile_term(self):
         """Compiles a Jack term.
         
@@ -427,31 +431,36 @@ class Parser:
             SyntaxError: Unexpected input
         """
 
+        term=None
         if self.tk.token_type == t.STRING_CONST:
-            self.compile_string()
+            term=a.term(type=t.STRING_CONST, value=self.compile_string())
         elif self.tk.token_type == t.INT_CONST:
             self.generator.write_push_pop('push', 'CONST', int(self.tk.curr_token))
+            term=a.term(type=t.INT_CONST, value=self.tk.curr_token)
             self.tk.advance()
         elif self.tk.curr_token in ('true', 'false', 'null'):
+            term=a.term(type=t.BOOLEAN, value=self.tk.curr_token)
             self.generator.write_push_pop('push', 'CONST', 0)
             if self.tk.curr_token == 'true':
                 self.generator.write_arithmetic("NOT")
             self.tk.advance()
         elif self.tk.curr_token == 'this':
+            term=a.term(type=t.POINTER, value=self.tk.curr_token)
             # "this" is the 0th argument
             self.generator.write_push_pop('push', 'POINTER', 0)  
             self.tk.advance()
         elif self.tk.curr_token in ('-', '~'):
             op = self.tk.curr_token
             self.tk.advance()
-            self.compile_term()
+            term=self.compile_term()
+            term=a.unary_expr(op=op, term=term)
             if op == '-':
                 self.generator.write_arithmetic('NEG')
             else:
                 self.generator.write_arithmetic('NOT')
         elif self.tk.curr_token == '(':
             self.tk.advance()  # "("
-            self.compile_expression()
+            term=self.compile_expression()
             self.tk.advance()  # ")"
         else:
             if self.tk.token_type != t.IDENTIFIER:
@@ -461,7 +470,7 @@ class Parser:
             self.tk.advance()        
             if self.tk.curr_token == '[':
                 self.tk.advance("[")  # "["
-                self.compile_expression()
+                expr=self.compile_expression()
                 self.tk.advance("]")  # "]"
 
                 _type, cat, i = self.symbol_table.get(var_name)
@@ -470,16 +479,18 @@ class Parser:
                 self.generator.write_arithmetic('ADD')
                 self.generator.write_push_pop('pop', 'POINTER', 1)
                 self.generator.write_push_pop('push', 'THAT', 0)
+                term=a.indexed_var(name=var_name, index=expr)
             elif self.tk.curr_token in ('.', '('):
-                self.compile_subroutine_call(var_name)
+                term=self.compile_subroutine_call(var_name)
             else:
                 _type, cat, i = self.symbol_table.get(var_name)
                 cat = self.convert_kind[cat]
+                term=a._var(name=var_name, type=_type, cat=cat)
                 self.generator.write_push_pop('push', cat, i)
+        return term
               
     def compile_subroutine_call(self, var_name):
         func_name = var_name
-        n_args = 0
 
         if self.tk.curr_token == '.':
             self.tk.advance(".")  # "."
@@ -491,21 +502,20 @@ class Parser:
                 cat = self.convert_kind[cat]
                 self.generator.write_push_pop('push', cat, i)
                 func_name = "{}.{}".format(_type, sub_name)
-                n_args += 1
             else:  # it's a class
                 func_name = "{}.{}".format(var_name, sub_name)
             
         elif self.tk.curr_token == '(':
             sub_name = var_name
             func_name = "{}.{}".format(self.class_name, sub_name)
-            n_args += 1
             self.generator.write_push_pop('push', 'POINTER', 0)
         
-        self.tk.advance("(")  # "("
-        n_args += self.compile_expression_list()
-        self.tk.advance(")")  # ")"
+        self.tk.advance("(")
+        exprs = self.compile_expression_list()
+        self.tk.advance(")")
 
-        self.generator.write_call(func_name, n_args)
+        self.generator.write_call(func_name, len(exprs))
+        return a._do(name=func_name, exprs=exprs)
     
     def compile_string(self):
         string = self.tk.curr_token[1:]
@@ -518,4 +528,5 @@ class Parser:
             self.generator.write_call('String.appendChar', 2)
         
         self.tk.advance()
+        return string
         

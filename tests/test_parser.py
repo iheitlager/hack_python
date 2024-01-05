@@ -42,7 +42,7 @@ _LIST = '''class List {
 
 def test_parser_basic():
     par = Parser()
-    par.parse(_PROG)
+    par.compile(_PROG)
     for line in par.out_stream:
         print(line)
     assert par.out_stream[0] == 'function Main.main 0'
@@ -52,7 +52,7 @@ def test_parser_basic():
 
 def test_parser_list():
     par = Parser()
-    par.parse(_LIST)
+    par.compile(_LIST)
     for line in par.out_stream:
         print(line)
     assert par.ast[0].name == "List"
