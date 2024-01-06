@@ -15,22 +15,22 @@ class Parser:
         if not tok:
             self.tk=t.Tokenizer()
         self.class_name = None
-        self.out_stream = []
+        # self.out_stream = []
         self.ast = []
-        self.if_count = 0
-        self.while_count = 0
-        self.generator = VMWriter(self.out_stream)
-        self.symbol_table = SymbolTable()
-        self.op_table = {
-            '+': 'ADD', '-': 'SUB', '&': 'AND', '|': 'OR', 
-            '<': 'LT', '>': 'GT', '=': 'EQ'
-        }
-        self.convert_kind = {
-            'ARG': 'ARG',
-            'STATIC': 'STATIC',
-            'VAR': 'LOCAL',
-            'FIELD': 'THIS'
-        }
+        # self.if_count = 0
+        # self.while_count = 0
+        # self.generator = VMWriter(self.out_stream)
+        # self.symbol_table = SymbolTable()
+        # self.op_table = {
+        #     '+': 'ADD', '-': 'SUB', '&': 'AND', '|': 'OR', 
+        #     '<': 'LT', '>': 'GT', '=': 'EQ'
+        # }
+        # self.convert_kind = {
+        #     'ARG': 'ARG',
+        #     'STATIC': 'STATIC',
+        #     'VAR': 'LOCAL',
+        #     'FIELD': 'THIS'
+        # }
         
     def compile(self, raw_code):
         """Start Jack parsing"""
@@ -86,7 +86,7 @@ class Parser:
             raise SyntaxError('{} is not a valid Jack identifier'
                                .format(self.tk.curr_token))
         var_name = self.tk.curr_token    
-        self.symbol_table.define(var_name, _type, cat)
+        # self.symbol_table.define(var_name, _type, cat)
         self.tk.advance()
         vars=[a.class_decl(name=var_name, _type=_type, cat=cat)]
         while self.tk.curr_token != ';':
@@ -96,7 +96,7 @@ class Parser:
                                   .format(self.tk.curr_token))
             var_name = self.tk.curr_token    
             vars.append(a.class_decl(name=var_name, _type=_type, cat=cat))    
-            self.symbol_table.define(var_name, _type, cat)
+            # self.symbol_table.define(var_name, _type, cat)
             self.tk.advance()
         
         self.tk.advance(";")
@@ -109,10 +109,10 @@ class Parser:
             SyntaxError: When unexpected input is given.
         """
 
-        self.symbol_table.reset()
+        # self.symbol_table.reset()
         subroutine_type = self.tk.curr_token
-        if subroutine_type == 'method':
-            self.symbol_table.define('this', self.class_name, 'ARG')
+        # if subroutine_type == 'method':
+        #     self.symbol_table.define('this', self.class_name, 'ARG')
         self.tk.advance(['function', 'method', 'constructor'])
         self.tk.advance()  # ("void" | type)
 
@@ -167,7 +167,7 @@ class Parser:
         if self.tk.token_type != t.IDENTIFIER:
             raise SyntaxError('{} is not a valid Jack identifier'
                               .format(self.tk.curr_token))
-        self.symbol_table.define(self.tk.curr_token, _type, cat)
+        # self.symbol_table.define(self.tk.curr_token, _type, cat)
         parameters = [a.parameter(name=self.tk.curr_token, _type=_type)]
         self.tk.advance()
 
@@ -180,7 +180,7 @@ class Parser:
             if self.tk.token_type != t.IDENTIFIER:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
-            self.symbol_table.define(self.tk.curr_token, _type, cat)
+            # self.symbol_table.define(self.tk.curr_token, _type, cat)
             parameters.append(a.parameter(name=self.tk.curr_token, _type=_type))
             self.tk.advance()
 
@@ -203,7 +203,7 @@ class Parser:
         if self.tk.token_type != t.IDENTIFIER:
             raise SyntaxError('{} is not a valid Jack identifer.'
                               .format(self.tk.curr_token))
-        self.symbol_table.define(self.tk.curr_token, _type, cat)
+        # self.symbol_table.define(self.tk.curr_token, _type, cat)
         locals = [a.local_decl(name=self.tk.curr_token, _type=_type)]
         self.tk.advance()
 
@@ -213,7 +213,7 @@ class Parser:
             if self.tk.token_type != t.IDENTIFIER:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
-            self.symbol_table.define(self.tk.curr_token, _type, cat)
+            # self.symbol_table.define(self.tk.curr_token, _type, cat)
             locals.append(a.local_decl(name=self.tk.curr_token, _type=_type))
             self.tk.advance()
         
@@ -251,8 +251,8 @@ class Parser:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
         var_name = self.tk.curr_token
-        _type, cat, i = self.symbol_table.get(self.tk.curr_token)
-        cat = self.convert_kind[cat]
+        # _type, cat, i = self.symbol_table.get(self.tk.curr_token)
+        # cat = self.convert_kind[cat]
         self.tk.advance()
 
         array_expr = None
@@ -288,13 +288,13 @@ class Parser:
         self.compile_expression()
         self.tk.advance(")")  # ")"
 
-        l1 = "IF_TRUE{}".format(self.if_count)
-        l2 = "IF_FALSE{}".format(self.if_count)
-        l3 = "IF_END{}".format(self.if_count)
+        # l1 = "IF_TRUE{}".format(self.if_count)
+        # l2 = "IF_FALSE{}".format(self.if_count)
+        # l3 = "IF_END{}".format(self.if_count)
         # self.generator.write_ifgoto(l1)
         # self.generator.write_goto(l2)
         # self.generator.write_label(l1)
-        self.if_count += 1
+        # self.if_count += 1
 
         self.tk.advance("{")  # "{"
         lines = self.compile_statements()
@@ -316,9 +316,9 @@ class Parser:
         """Compiles a Jack "while" statement.
         """
         self.tk.advance("while")
-        l1 = "WHILE_EXP{}".format(self.while_count)
-        l2 = "WHILE_END{}".format(self.while_count)
-        self.while_count += 1
+        # l1 = "WHILE_EXP{}".format(self.while_count)
+        # l2 = "WHILE_END{}".format(self.while_count)
+        # self.while_count += 1
 
         # self.generator.write_label(l1)
 
@@ -470,8 +470,8 @@ class Parser:
                 expr=self.compile_expression()
                 self.tk.advance("]")  
 
-                _type, cat, i = self.symbol_table.get(var_name)
-                cat = self.convert_kind[cat]
+                # _type, cat, i = self.symbol_table.get(var_name)
+                # cat = self.convert_kind[cat]
                 # self.generator.write_push_pop('push', cat, i)
                 # self.generator.write_arithmetic('ADD')
                 # self.generator.write_push_pop('pop', 'POINTER', 1)
@@ -481,8 +481,8 @@ class Parser:
             elif self.tk.curr_token in ('.', '('):
                 term=self.compile_subroutine_call(var_name)
             else:
-                _type, cat, i = self.symbol_table.get(var_name)
-                cat = self.convert_kind[cat]
+                # _type, cat, i = self.symbol_table.get(var_name)
+                # cat = self.convert_kind[cat]
                 # term=a._var(name=var_name, _type=_type, cat=cat)
                 term=a.term(_type=t.VAR, value=var_name)
                 # self.generator.write_push_pop('push', cat, i)
@@ -496,18 +496,18 @@ class Parser:
             sub_name = self.tk.curr_token  # subroutine name
             self.tk.advance()
 
-            _type, cat, i = self.symbol_table.get(var_name)
-            if _type is not None:  # it's an instance
-                cat = self.convert_kind[cat]
+            # _type, cat, i = self.symbol_table.get(var_name)
+            # if _type is not None:  # it's an instance
+            #     cat = self.convert_kind[cat]
                 # self.generator.write_push_pop('push', cat, i)
-                func_name = "{}.{}".format(_type, sub_name)
-            else:  # it's a class
-                func_name = "{}.{}".format(var_name, sub_name)
+                # func_name = "{}.{}".format(_type, sub_name)
+            # else:  # it's a class
+            func_name = "{}.{}".format(var_name, sub_name)
             
         elif self.tk.curr_token == '(':
             sub_name = var_name
             func_name = "{}.{}".format(self.class_name, sub_name)
-            self.generator.write_push_pop('push', 'POINTER', 0)
+            # self.generator.write_push_pop('push', 'POINTER', 0)
         
         self.tk.advance("(")
         exprs = self.compile_expression_list()
