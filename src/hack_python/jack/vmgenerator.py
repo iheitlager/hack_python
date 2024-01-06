@@ -13,10 +13,12 @@ from hack_python.jack import tokenizer as tk
 class VMGenerator:
     """Generates the VM code from the ast
     """
-    def __init__(self):
-        self.symbol_table = SymbolTable()
+    def __init__(self, class_name=None, symbol_table=None):
+        self.symbol_table = symbol_table
+        if not symbol_table:
+            self.symbol_table = SymbolTable()
         self.out_stream = []
-        self.class_name = None
+        self.class_name = class_name
         self.writer = VMWriter(self.out_stream)
         self.convert_kind = {
             'ARG': 'ARG',
@@ -105,11 +107,17 @@ class VMGenerator:
         self.writer.write_push_pop('pop', 'TEMP', 0)  # void method
 
     def gen_let(self, item: a.let):
-        _type, cat, i = self.symbol_table.get(item.var)
+        if isinstance(item.var, tuple):
+            var_name = item.var[0]
+            array_expr = item.var[1]
+        else:
+            var_name = item.var
+
+        _type, cat, i = self.symbol_table.get(var_name)
         cat = self.convert_kind[cat]
 
-        if item.array_expr:
-            self.gen_expr(item.array_expr)
+        if isinstance(item.var, tuple):
+            self.gen_expr(array_expr)
 
             self.writer.write_push_pop('push', cat, i)
             self.writer.write_arithmetic('ADD')

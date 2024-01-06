@@ -1,7 +1,7 @@
 from hack_python.jack.parser import Parser
 from hack_python.jack.vmgenerator import VMGenerator
 from hack_python.jack import ast as a
-from tests.test_parser import _PROG, _LIST
+from tests.test_parser import _PROG, _LIST, mock_singlestms_parse
 
 import pprint
 
@@ -42,11 +42,11 @@ _LOCAL_VAR = '''class List {
             var List current;
             let current  = this;
 
-//            while (~(current = null)) {
-//                do Output.printInt(current.getData());
-//                do Output.printChar(32);
-//                let current = current.getNext();
-//            }
+            while (~(current = null)) {
+                do Output.printInt(current.getData());
+                do Output.printChar(32);
+                let current = current.getNext();
+            }
 
             return;
         }
@@ -88,6 +88,16 @@ def test_gen_local_var():
     pprint.pprint(par.ast)
     gen = VMGenerator()
     gen.generate(par.ast)
+    pprint.pprint(gen.out_stream)
+    assert gen.out_stream[-1] == 'return'
+
+
+def test_gen_array_assignment():
+    res = mock_singlestms_parse("var Array a, b, c; let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
+    pprint.pprint(res)
+    gen = VMGenerator()
+    gen.generate(res)
+    pprint.pprint(gen.out_stream)
     assert gen.out_stream[-1] == 'return'
 
 # @pytest.mark.skip(reason="currently not part of test suite")

@@ -1,4 +1,4 @@
-from hack_python.jack.tokenizer import Tokenizer
+from hack_python.jack import tokenizer as t
 
 
 ARRAY_TEST = '''class Main {
@@ -33,8 +33,16 @@ ARRAY_TEST = '''class Main {
 }'''
 
 def test_tokenizer():
-	tok = Tokenizer()
+	tok = t.Tokenizer()
 	tok.tokenize(ARRAY_TEST)
 	for i, tk in enumerate(tok.tokens):
 		print(i, tk)
 	assert tk == '}'
+
+def test_singleline():
+	tok = t.Tokenizer()
+	tok.tokenize("let c = null;")
+	for i, tk in enumerate(tok.tokens):
+		print(i, tk)
+	assert tk == ';'
+	

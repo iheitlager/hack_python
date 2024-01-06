@@ -173,3 +173,24 @@ def test_parser_square():
     assert isinstance(par.ast[0].class_decls[0], a.var_decl)
     assert par.ast[0].class_decls[0].cat == "FIELD"
     assert isinstance(par.ast[0].lines[0], a.subroutine)
+
+def mock_singlestms_parse(line):
+    tok=Tokenizer()
+    tok.tokenize(line + ';') # add a dummy token
+    par = Parser(tok=tok)
+    res = par.compile_statements()
+    return res
+
+def test_singleline():
+    res = mock_singlestms_parse("let c = null;")
+    assert res == [a.let(var='c', expr=a.term(_type=6, value='null'))]
+
+def test_parse_array_def():
+    res = mock_singlestms_parse("var Array a, b, c; ")
+    assert res == []
+
+def test_parse_array_assignment():
+    res = mock_singlestms_parse("let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
+    assert res[0] == a.let(var=('a', a.term(_type=3, value=3)), expr=a.term(_type=3, value=2))
+    assert res[1] == a.let(var='c', expr=a.term(_type=9, value=('a', a.term(_type=3, value=3))))
+    assert res[2] == a.let(var=('a', a.term(_type=8, value='size')), expr=a.subroutine_call(name='Array.new', exprs=[a.term(_type=3, value=3)]))

@@ -1,4 +1,4 @@
-from . import INSTRUCTION_SET, HACK_MASK, IllegalOperand
+from . import INSTRUCTION_SET, IllegalOperand
 
 def create_mask(width):
     '''creates a bit mask for word length'''

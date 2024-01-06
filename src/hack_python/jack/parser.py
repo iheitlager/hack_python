@@ -218,21 +218,20 @@ class Parser:
         var_name = self.tk.curr_token
         self.tk.advance()
 
-        array_expr = None
         if self.tk.curr_token == '[':  # array assignment
             self.tk.advance("[") 
-            array_expr = self.compile_expression()
+            var_name = (var_name, self.compile_expression())
             self.tk.advance("]") 
 
             self.tk.advance("=") 
-            expr =self.compile_expression()
+            expr = self.compile_expression()
 
         else:
             self.tk.advance("=") 
             expr = self.compile_expression()
         
         self.tk.advance(";") 
-        return a.let(var=var_name, array_expr=array_expr, expr=expr)
+        return a.let(var=var_name, expr=expr)
 
     def compile_if_statement(self):
         """Compiles a Jack "if" statement.

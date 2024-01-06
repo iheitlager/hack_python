@@ -1,6 +1,7 @@
 ## This is the main ast for Jack
 
 from dataclasses import dataclass, field
+from typing import Any
 
 ### Main type
 class ast:
@@ -46,8 +47,7 @@ class _return(stmt):
 
 @dataclass
 class let(stmt):
-    var: str
-    array_expr: ast
+    var: Any
     expr: ast
 
 @dataclass
@@ -85,4 +85,4 @@ class unary_expr(expr):
 @dataclass
 class term(expr):
     _type: str
-    value: str
+    value: Any
