@@ -132,17 +132,17 @@ class Parser:
             locals += self.compile_var_dec()
         
 
-        n_args = self.symbol_table.var_count('VAR')
-        self.generator.write_function(func_name, len(locals))
+        # n_args = self.symbol_table.var_count('VAR')
+        # self.generator.write_function(func_name, len(locals))
 
-        if subroutine_type == 'constructor':
-            n_fields = self.symbol_table.var_count('FIELD')
-            self.generator.write_push_pop('push', 'CONST', n_fields)
-            self.generator.write_call('Memory.alloc', 1)
-            self.generator.write_push_pop('pop', 'POINTER', 0)
-        elif subroutine_type == 'method':
-            self.generator.write_push_pop('push', 'ARG', 0)
-            self.generator.write_push_pop('pop', 'POINTER', 0)
+        # if subroutine_type == 'constructor':
+        #     n_fields = self.symbol_table.var_count('FIELD')
+        #     self.generator.write_push_pop('push', 'CONST', n_fields)
+        #     self.generator.write_call('Memory.alloc', 1)
+        #     self.generator.write_push_pop('pop', 'POINTER', 0)
+        # elif subroutine_type == 'method':
+        #     self.generator.write_push_pop('push', 'ARG', 0)
+        #     self.generator.write_push_pop('pop', 'POINTER', 0)
         
         lines = self.compile_statements()
         self.tk.advance("}")  # "}"
@@ -261,20 +261,20 @@ class Parser:
             array_expr = self.compile_expression()
             self.tk.advance("]") 
 
-            self.generator.write_push_pop('push', cat, i)
-            self.generator.write_arithmetic('ADD')
-            self.generator.write_push_pop('pop', 'TEMP', 0)
+            # self.generator.write_push_pop('push', cat, i)
+            # self.generator.write_arithmetic('ADD')
+            # self.generator.write_push_pop('pop', 'TEMP', 0)
 
             self.tk.advance("=") 
             expr =self.compile_expression()
 
-            self.generator.write_push_pop('push', 'TEMP', 0)
-            self.generator.write_push_pop('pop', 'POINTER', 1)
-            self.generator.write_push_pop('pop', 'THAT', 0)
+            # self.generator.write_push_pop('push', 'TEMP', 0)
+            # self.generator.write_push_pop('pop', 'POINTER', 1)
+            # self.generator.write_push_pop('pop', 'THAT', 0)
         else:
             self.tk.advance("=") 
             expr = self.compile_expression()
-            self.generator.write_push_pop('pop', cat, i)
+            # self.generator.write_push_pop('pop', cat, i)
         
         self.tk.advance(";") 
         return a.let(var=var_name, array_expr=array_expr, expr=expr)
@@ -291,47 +291,47 @@ class Parser:
         l1 = "IF_TRUE{}".format(self.if_count)
         l2 = "IF_FALSE{}".format(self.if_count)
         l3 = "IF_END{}".format(self.if_count)
-        self.generator.write_ifgoto(l1)
-        self.generator.write_goto(l2)
-        self.generator.write_label(l1)
+        # self.generator.write_ifgoto(l1)
+        # self.generator.write_goto(l2)
+        # self.generator.write_label(l1)
         self.if_count += 1
 
         self.tk.advance("{")  # "{"
         lines = self.compile_statements()
-        self.generator.write_goto(l3)
+        # self.generator.write_goto(l3)
         self.tk.advance("}")  # "}"
-        self.generator.write_label(l2)
+        # self.generator.write_label(l2)
 
         else_lines = []
         if self.tk.curr_token == 'else':
-            self.tk.advance("else")  # "else"
-            self.tk.advance("{")  # "{"
+            self.tk.advance("else")
+            self.tk.advance("{")
             else_lines += self.compile_statements()
-            self.tk.advance("}")  # "}"
+            self.tk.advance("}")
         
-        self.generator.write_label(l3)
+        # self.generator.write_label(l3)
         return a._if(0, lines=lines, else_lines=else_lines)
     
     def compile_while_statement(self):
         """Compiles a Jack "while" statement.
         """
-        self.tk.advance("while")  # "while"
+        self.tk.advance("while")
         l1 = "WHILE_EXP{}".format(self.while_count)
         l2 = "WHILE_END{}".format(self.while_count)
         self.while_count += 1
 
-        self.generator.write_label(l1)
+        # self.generator.write_label(l1)
 
-        self.tk.advance("(")  # "("
+        self.tk.advance("(")
         expr = self.compile_expression()
-        self.generator.write_arithmetic("NOT")
-        self.tk.advance(")")  # ")"
-        self.tk.advance("{")  # "{"
+        # self.generator.write_arithmetic("NOT")
+        self.tk.advance(")")
+        self.tk.advance("{")
 
-        self.generator.write_ifgoto(l2)
+        # self.generator.write_ifgoto(l2)
         lines = self.compile_statements()
-        self.generator.write_goto(l1)
-        self.generator.write_label(l2)
+        # self.generator.write_goto(l1)
+        # self.generator.write_label(l2)
 
         self.tk.advance("}")  # "}"
         return a._while(expr=expr, lines=lines)
@@ -352,7 +352,7 @@ class Parser:
         self.tk.advance()
         
         stmt = self.compile_subroutine_call(var_name)
-        self.generator.write_push_pop('pop', 'TEMP', 0)  # void method
+        # self.generator.write_push_pop('pop', 'TEMP', 0)  # void method
         self.tk.advance(";") 
         return a._do(expr=stmt)
     
@@ -365,11 +365,11 @@ class Parser:
         expr=0
         if self.tk.curr_token != ';':
             expr =self.compile_expression()
-        else:
+        # else:
             # if no val to return, push 0 to stack
-            self.generator.write_push_pop('push', 'CONST', 0) 
+            # self.generator.write_push_pop('push', 'CONST', 0) 
         
-        self.generator.write_return()
+        # self.generator.write_return()
         self.tk.advance(";")  # ";"
         return a._return(expr)
     
@@ -410,14 +410,14 @@ class Parser:
 
             r_term = self.compile_term()
             expr = a.bin_expr(l_term=expr, op=op, r_term=r_term)
-            if op in self.op_table:
-                self.generator.write_arithmetic(self.op_table.get(op))
-            elif op == '*':
-                self.generator.write_call('Math.multiply', 2)
-            elif op == '/':
-                self.generator.write_call('Math.divide', 2)
-            else:
-                raise ValueError("{} not supported op.".format(op))
+            # if op in self.op_table:
+            #     self.generator.write_arithmetic(self.op_table.get(op))
+            # elif op == '*':
+            #     self.generator.write_call('Math.multiply', 2)
+            # elif op == '/':
+            #     self.generator.write_call('Math.divide', 2)
+            # else:
+            #     raise ValueError("{} not supported op.".format(op))
         return expr
 
                 
@@ -432,29 +432,29 @@ class Parser:
         if self.tk.token_type == t.STRING_CONST:
             term=a.term(_type=t.STRING_CONST, value=self.compile_string())
         elif self.tk.token_type == t.INT_CONST:
-            self.generator.write_push_pop('push', 'CONST', int(self.tk.curr_token))
+            # self.generator.write_push_pop('push', 'CONST', int(self.tk.curr_token))
             term=a.term(_type=t.INT_CONST, value=int(self.tk.curr_token))
             self.tk.advance()
         elif self.tk.curr_token in ('true', 'false', 'null'):
             term=a.term(_type=t.BOOLEAN, value=self.tk.curr_token)
-            self.generator.write_push_pop('push', 'CONST', 0)
-            if self.tk.curr_token == 'true':
-                self.generator.write_arithmetic("NOT")
+            # self.generator.write_push_pop('push', 'CONST', 0)
+            # if self.tk.curr_token == 'true':
+            #     self.generator.write_arithmetic("NOT")
             self.tk.advance()
         elif self.tk.curr_token == 'this':
             term=a.term(_type=t.POINTER, value=self.tk.curr_token)
             # "this" is the 0th argument
-            self.generator.write_push_pop('push', 'POINTER', 0)  
+            # self.generator.write_push_pop('push', 'POINTER', 0)  
             self.tk.advance()
         elif self.tk.curr_token in ('-', '~'):
             op = self.tk.curr_token
             self.tk.advance()
             term=self.compile_term()
             term=a.unary_expr(op=op, term=term)
-            if op == '-':
-                self.generator.write_arithmetic('NEG')
-            else:
-                self.generator.write_arithmetic('NOT')
+            # if op == '-':
+            #     self.generator.write_arithmetic('NEG')
+            # else:
+            #     self.generator.write_arithmetic('NOT')
         elif self.tk.curr_token == '(':
             self.tk.advance("(") 
             term=self.compile_expression()
@@ -472,10 +472,10 @@ class Parser:
 
                 _type, cat, i = self.symbol_table.get(var_name)
                 cat = self.convert_kind[cat]
-                self.generator.write_push_pop('push', cat, i)
-                self.generator.write_arithmetic('ADD')
-                self.generator.write_push_pop('pop', 'POINTER', 1)
-                self.generator.write_push_pop('push', 'THAT', 0)
+                # self.generator.write_push_pop('push', cat, i)
+                # self.generator.write_arithmetic('ADD')
+                # self.generator.write_push_pop('pop', 'POINTER', 1)
+                # self.generator.write_push_pop('push', 'THAT', 0)
                 # term=a.indexed_var(name=var_name, index=expr)
                 term=a.term(_type=t.INDEXED_VAR, value=(var_name, expr))
             elif self.tk.curr_token in ('.', '('):
@@ -485,7 +485,7 @@ class Parser:
                 cat = self.convert_kind[cat]
                 # term=a._var(name=var_name, _type=_type, cat=cat)
                 term=a.term(_type=t.VAR, value=var_name)
-                self.generator.write_push_pop('push', cat, i)
+                # self.generator.write_push_pop('push', cat, i)
         return term
               
     def compile_subroutine_call(self, var_name):
@@ -499,7 +499,7 @@ class Parser:
             _type, cat, i = self.symbol_table.get(var_name)
             if _type is not None:  # it's an instance
                 cat = self.convert_kind[cat]
-                self.generator.write_push_pop('push', cat, i)
+                # self.generator.write_push_pop('push', cat, i)
                 func_name = "{}.{}".format(_type, sub_name)
             else:  # it's a class
                 func_name = "{}.{}".format(var_name, sub_name)
@@ -513,18 +513,18 @@ class Parser:
         exprs = self.compile_expression_list()
         self.tk.advance(")")
 
-        self.generator.write_call(func_name, len(exprs))
+        # self.generator.write_call(func_name, len(exprs))
         return a.subroutine_call(name=func_name, exprs=exprs)
     
     def compile_string(self):
         string = self.tk.curr_token[1:]
 
-        self.generator.write_push_pop('push', 'CONST', len(string))
-        self.generator.write_call('String.new', 1)
+        # self.generator.write_push_pop('push', 'CONST', len(string))
+        # self.generator.write_call('String.new', 1)
 
-        for char in string:
-            self.generator.write_push_pop('push', 'CONST', ord(char))
-            self.generator.write_call('String.appendChar', 2)
+        # for char in string:
+        #     self.generator.write_push_pop('push', 'CONST', ord(char))
+        #     self.generator.write_call('String.appendChar', 2)
         
         self.tk.advance()
         return string

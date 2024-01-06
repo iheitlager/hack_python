@@ -90,9 +90,6 @@ def test_gen_local_var():
     gen.generate(par.ast)
     assert gen.out_stream[-1] == 'return'
 
-
-    
-
 # @pytest.mark.skip(reason="currently not part of test suite")
 def test_gen_list():
     par = Parser()
