@@ -1,4 +1,9 @@
 # taken from https://github.com/volf52/jack_compiler/blob/master/generator.py
+# This is extending the ast traversal code generation from the VM code writing
+#   - Using AST allows from programmatically testing and altering the main Jack code
+#   - Delegated Symbol table build up during code generation
+#   - Allows for alternative code generation patterns
+
 import typing
 from hack_python.jack import ast as a
 from hack_python.jack.symbolTable import SymbolTable
@@ -79,9 +84,9 @@ class VMGenerator:
         if item._type == 'method':
             self.symbol_table.define('this', self.class_name, 'ARG')
         for x in item.parameters:
-            self.symbol_table.define(x.name, x._type, 'ARG')
+            self.symbol_table.define(x.name, x._type, x.cat)
         for x in item.locals:
-            self.symbol_table.define(x.name, x._type, 'VAR')
+            self.symbol_table.define(x.name, x._type, x.cat)
         if item._type == 'constructor':
             n_fields = self.symbol_table.var_count('FIELD')
             self.writer.write_push_pop('push', 'CONST', n_fields)

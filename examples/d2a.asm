@@ -11,9 +11,13 @@
 // function Main.main starts here
 (Main.main)
 // i=0
+    @0
+    D=A
     @i
     M=D
 // sum=0
+    @0
+    D=A
     @sum
     M=D
 (while_loop_1)
@@ -83,6 +87,7 @@
     @Temp.print_i2a
     0;JMP
 (Temp.print_i2a.RET_2) // continue here after process call to Temp.print_i2a
+// 0x4000=45
     @45
     D=A
     @16384
@@ -148,6 +153,7 @@
     @while_loop_1
     0;JMP
 (while_loop_1$end)
+// 0x5000=10
     @10
     D=A
     @20480
@@ -206,12 +212,12 @@
 
 // function Temp.print_i2a starts here
 (Temp.print_i2a)
+// R9=n
     @ARG
     D=M
     @0
     A=D+A
     D=M
-// R9=n
     @R9
     M=D
 // for R5 in [10000, 1000, 100, 10]
@@ -260,15 +266,19 @@
     D;JLE
     @R5
     M=D
+// R6=R9
     @R9
     D=M
-// R6=R9
     @R6
     M=D
 // R7=0
+    @0
+    D=A
     @R7
     M=D
 // R8=0
+    @0
+    D=A
     @R8
     M=D
 (while_loop_5)
@@ -301,6 +311,7 @@
     D=M
     @R9
     M=M+D // R9+=R5
+// 0x4000=R7+47
     @47
     D=A
     @R7
@@ -311,6 +322,7 @@
     @for_list_loop_4
     0;JMP
 (for_list_loop_4$end)
+// 0x4000=R9+48
     @48
     D=A
     @R9

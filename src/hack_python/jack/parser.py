@@ -1,7 +1,11 @@
 # Taken from https://github.com/volf52/jack_compiler/blob/master/engine.py
+# This rewrite has several improvements
+#     - Optimized the link with the tokenizer
+#     - Separation of concerns through separating parsing from generation by ast
+#     - Thereby separated parsing phase from generation phase
+#     - Improved parsing by demanding specific tokens in the recursive descent
+#     - Delegated Symbol table building to generation time
 
-from .vmgenerator import VMWriter
-from .symbolTable import SymbolTable
 from . import tokenizer as t
 from . import ast as a
 
@@ -39,18 +43,18 @@ class Parser:
 
         self.tk.advance("class") 
         self.class_name = self.tk.curr_token
-        ast = a._class(name=self.class_name)
+        res = a._class(name=self.class_name)
         self.tk.advance()
         self.tk.advance("{") 
 
         while self.tk.curr_token in ('static', 'field'):
-            ast.class_decls += self.compile_class_var_dec()
+            res.class_decls += self.compile_class_var_dec()
         while self.tk.curr_token in ('constructor', 'function', 'method'):
-            ast.extend(self.compile_subroutine())
+            res.extend(self.compile_subroutine())
 
         if self.tk.curr_token != '}':
             raise SyntaxError('} expected at end of class {}.'.format(self.class_name))  # noqa: F521
-        return ast 
+        return res 
 
     def compile_class_var_dec(self):
         """Compiles the Jack class variable declaration(s).
@@ -72,14 +76,14 @@ class Parser:
                                .format(self.tk.curr_token))
         var_name = self.tk.curr_token    
         self.tk.advance()
-        vars=[a.class_decl(name=var_name, _type=_type, cat=cat)]
+        vars=[a.var_decl(name=var_name, _type=_type, cat=cat)]
         while self.tk.curr_token != ';':
             self.tk.advance(",")
             if self.tk.token_type != t.IDENTIFIER:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
             var_name = self.tk.curr_token    
-            vars.append(a.class_decl(name=var_name, _type=_type, cat=cat))    
+            vars.append(a.var_decl(name=var_name, _type=_type, cat=cat))    
             self.tk.advance()
         
         self.tk.advance(";")
@@ -126,13 +130,14 @@ class Parser:
         if self.tk.curr_token == ')':
             return []
         
+        cat = "ARG"
         _type = self.tk.curr_token
         self.tk.advance()
 
         if self.tk.token_type != t.IDENTIFIER:
             raise SyntaxError('{} is not a valid Jack identifier'
                               .format(self.tk.curr_token))
-        parameters = [a.parameter(name=self.tk.curr_token, _type=_type)]
+        parameters = [a.var_decl(name=self.tk.curr_token, _type=_type, cat=cat)]
         self.tk.advance()
 
         while self.tk.curr_token != ')':
@@ -144,7 +149,7 @@ class Parser:
             if self.tk.token_type != t.IDENTIFIER:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
-            parameters.append(a.parameter(name=self.tk.curr_token, _type=_type))
+            parameters.append(a.var_decl(name=self.tk.curr_token, _type=_type, cat=cat))
             self.tk.advance()
 
         return parameters
@@ -156,7 +161,7 @@ class Parser:
         Raises:
             SyntaxError: When unexpected input is provided.
         """
-
+        cat = "VAR"
         self.tk.advance('var')
         _type = self.tk.curr_token
         self.tk.advance()
@@ -164,7 +169,7 @@ class Parser:
         if self.tk.token_type != t.IDENTIFIER:
             raise SyntaxError('{} is not a valid Jack identifer.'
                               .format(self.tk.curr_token))
-        locals = [a.local_decl(name=self.tk.curr_token, _type=_type)]
+        locals = [a.var_decl(name=self.tk.curr_token, _type=_type, cat=cat)]
         self.tk.advance()
 
         while self.tk.curr_token != ';':
@@ -173,7 +178,7 @@ class Parser:
             if self.tk.token_type != t.IDENTIFIER:
                 raise SyntaxError('{} is not a valid Jack identifer.'
                                   .format(self.tk.curr_token))
-            locals.append(a.local_decl(name=self.tk.curr_token, _type=_type))
+            locals.append(a.var_decl(name=self.tk.curr_token, _type=_type, cat=cat))
             self.tk.advance()
         
         self.tk.advance(";")

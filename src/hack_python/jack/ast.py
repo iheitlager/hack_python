@@ -1,14 +1,24 @@
+## This is the main ast for Jack
+
 from dataclasses import dataclass, field
 
+### Main type
 class ast:
     def visit(self, visitor):
         return visitor.visit(self)
 
-
+### Sub types
 class block(ast):
     def extend(self, *args):
         self.lines.extend(args)
 
+class stmt(ast):
+    pass
+
+class expr(ast):
+    pass
+
+### Definition types
 @dataclass
 class _class(block):
     name: str
@@ -16,7 +26,7 @@ class _class(block):
     lines: list = field(default_factory=list)
 
 @dataclass
-class class_decl(ast):
+class var_decl(ast):
     name: str
     _type: str
     cat: str
@@ -29,20 +39,7 @@ class subroutine(block):
     locals: list = field(default_factory=list)
     lines: list = field(default_factory=list)
 
-@dataclass
-class parameter(ast):
-    name: str
-    _type: str
-
-@dataclass
-class local_decl(ast):
-    name: str
-    _type: str
-
-@dataclass
-class stmt(ast):
-    pass
-
+### Statements
 @dataclass
 class _return(stmt):
     expr: ast
@@ -65,26 +62,27 @@ class _if(block):
     else_lines: list = field(default_factory=list)
 
 @dataclass
-class _do(block):
+class _do(stmt):
     expr: ast
 
+### Expressions
 @dataclass
-class subroutine_call(ast):
+class subroutine_call(expr):
     name: str
     exprs: list = field(default_factory=list)
 
 @dataclass
-class bin_expr(ast):
+class bin_expr(expr):
     l_term: ast
     op: str
     r_term: ast
 
 @dataclass
-class unary_expr(ast):
+class unary_expr(expr):
     op: str
     term: ast
 
 @dataclass
-class term(ast):
+class term(expr):
     _type: str
     value: str

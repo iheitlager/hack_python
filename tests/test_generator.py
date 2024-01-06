@@ -1,3 +1,5 @@
+import pytest
+
 from hack_python import generator as g
 from hack_python import ast as a
 
@@ -8,15 +10,15 @@ def test_var_code():
 
 def test_assign_const():
     gen = g.hack_code_generator()
-    assert gen.generate(a.assign(a.var('i'), 0)) == ["@i", "M=0 // i=0"]
+    assert gen.generate(a.assign(a.var('i'), 0)) == ["// i=0", "@0", "D=A", "@i", "M=D"]
 
 def test_assign_var():
     gen = g.hack_code_generator(vars={"_$i": [True, a.STATIC, 0, 0], "_$j": [True, a.STATIC, 0, 0]})
-    assert gen.generate(a.assign(a.var('i'), a.var('j'))) == ["@j", "D=M", "@i", "M=D // i=j"]
+    assert gen.generate(a.assign(a.var('i'), a.var('j'))) == ["// i=j", "@j", "D=M", "@i", "M=D"]
 
 def test_assign_code():
     gen = g.hack_code_generator()
-    assert gen.generate(a.assign(a.var('i'), 100)) == ["@100", "D=A", "@i", "M=D // i=100"]
+    assert gen.generate(a.assign(a.var('i'), 100)) == ["// i=100", "@100", "D=A", "@i", "M=D"]
 
 def test_add_var():
     gen = g.hack_code_generator()
@@ -24,7 +26,7 @@ def test_add_var():
 
 def test_assign_add():
     gen = g.hack_code_generator(vars={"_$i": [True, a.STATIC, 0, 0], "_$sum": [True, a.STATIC, 0, 0]})
-    assert gen.generate(a.assign(a.var("sum"), a.add(a.var("sum"), a.var("i")))) == ['@i', 'D=M', '@sum', 'D=M+D', '@sum',  'M=D // sum=sum+i']
+    assert gen.generate(a.assign(a.var("sum"), a.add(a.var("sum"), a.var("i")))) == ['// sum=sum+i', '@i', 'D=M', '@sum', 'D=M+D', '@sum',  'M=D']
 
 def test_function_header():
     gen = g.hack_code_generator()
@@ -62,12 +64,13 @@ def test_callsubroutine():
 
 def test_output(): 
     gen = g.hack_code_generator()
-    assert gen.generate(a.assign(0x4000, a.add(a.var('R7'), 47))) == ['@47', 'D=A', '@R7', 'D=M+D', '@16384', 'M=D // 0x4000=R7+47']
+    assert gen.generate(a.assign(0x4000, a.add(a.var('R7'), 47))) == ['// 0x4000=R7+47', '@47', 'D=A', '@R7', 'D=M+D', '@16384', 'M=D // 0x4000=R7+47']
 
 def test_while_comp():
     gen = g.hack_code_generator()
     assert gen.generate(a.while_loop(a.ge(a.var("R6"))))[0:5] == ['(while_loop_1)', '@R6', 'D=M', '@while_loop_1$end', 'D;JLT']
 
+@pytest.mark.skip(reason="excluded, used as code generator")
 def test_generator():
     p = a.program('d2a')
 

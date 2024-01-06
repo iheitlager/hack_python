@@ -1,7 +1,5 @@
 # Taken from https://github.com/volf52/jack_compiler/blob/master/symbolTable.py
 
-
-
 class SymbolTable(dict):
     """A hashtable to perform variable lookup.
     Subclass of dict with a few special methods.

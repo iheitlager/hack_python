@@ -170,5 +170,6 @@ def test_parser_square():
     par.compile(_SQUARE)
     print(par.ast)
     assert len(par.ast) == 1
-    assert isinstance(par.ast[0].class_decls[0], a.class_decl)
+    assert isinstance(par.ast[0].class_decls[0], a.var_decl)
+    assert par.ast[0].class_decls[0].cat == "FIELD"
     assert isinstance(par.ast[0].lines[0], a.subroutine)

@@ -177,7 +177,6 @@ class hack_code_generator:
         self.pop_context(local_counter = old_counter)
         return res
 
-
     def gen_function(self, item) -> list[str]:
         name = "{}.{}".format(self.context[-1], item.name)
         old_counter = self.push_context(item.name)
@@ -272,8 +271,13 @@ class hack_code_generator:
 
     def gen_assign(self, item) -> list[str]:
         res = []
+        if isinstance(item.variable, int):
+            res += ["// 0x{:04X}={}".format(int(item.variable), str(item.expr))]
+        else:   
+            res += ["// {}={}".format(item.variable.name, str(item.expr))]
         if item.expr in [-1, 0, 1]:
             op = str(item.expr)
+            res += ['@' + str(item.expr), "D=A"]
         elif isinstance(item.expr, int):
             res += ['@' + str(item.expr), "D=A"]
             op = "D"
@@ -286,8 +290,7 @@ class hack_code_generator:
         if isinstance(item.variable, int):
             res += ["@" + str(item.variable), "M=" + op + " // 0x{:04X}={}".format(item.variable, str(item.expr))]
         else:
-            # res += ["@" + self._var(item.variable.name, use=True), "M=" + op + " // {}={}".format(item.variable.name, str(item.expr))]
-            res += ["// {}={}".format(item.variable.name, str(item.expr))]
+            # res += ["@" + self._var(item.variable.name, use=True), "M=" + op + " // {}={}".format(item.variable.name, str(item.expr))]            
             res += self.gen_store_var(item.variable)
         return res
 
@@ -359,7 +362,7 @@ class hack_code_generator:
             elif spec[1] == a.STATIC:
                 return ['@'+item.name, 'M=D'] # Let the assembler resolve the symbol
             else:
-                raise NotImplementedError
+                return ['@'+item.name, 'M=D'] # Let the assembler resolve the symbol
 
     def gen_var(self, item) -> list[str]:
         self._var(item.name, use=True)
