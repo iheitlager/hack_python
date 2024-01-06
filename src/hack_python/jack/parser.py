@@ -123,9 +123,6 @@ class Parser:
         Raises:
             SyntaxError: When unexpected input is given.
         """
-
-        cat = 'ARG'
-
         if self.tk.curr_token == ')':
             return []
         
@@ -161,8 +158,6 @@ class Parser:
         """
 
         self.tk.advance('var')
-        cat = 'VAR'
-
         _type = self.tk.curr_token
         self.tk.advance()
 
