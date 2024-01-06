@@ -12,22 +12,19 @@ class block(ast):
 @dataclass
 class _class(block):
     name: str
+    class_decls: list = field(default_factory=list)
     lines: list = field(default_factory=list)
 
 @dataclass
-class field_decl(ast):
-    type: str
-    vars: list = field(default_factory=list)
-
-@dataclass
-class static_decl(ast):
-    type: str
-    vars: list = field(default_factory=list)
+class class_decl(ast):
+    name: str
+    _type: str
+    cat: str
 
 @dataclass
 class subroutine(block):
     name: str
-    type: str
+    _type: str
     parameters: list = field(default_factory=list)
     locals: list = field(default_factory=list)
     lines: list = field(default_factory=list)
@@ -35,12 +32,12 @@ class subroutine(block):
 @dataclass
 class parameter(ast):
     name: str
-    type: str
+    _type: str
 
 @dataclass
 class local_decl(ast):
-    type: str
-    vars: list = field(default_factory=list)
+    name: str
+    _type: str
 
 @dataclass
 class stmt(ast):
@@ -52,8 +49,8 @@ class _return(stmt):
 
 @dataclass
 class let(stmt):
-    name: str
-    str_expr: ast
+    var: str
+    array_expr: ast
     expr: ast
 
 @dataclass
@@ -69,6 +66,10 @@ class _if(block):
 
 @dataclass
 class _do(block):
+    expr: ast
+
+@dataclass
+class subroutine_call(ast):
     name: str
     exprs: list = field(default_factory=list)
 
@@ -85,16 +86,16 @@ class unary_expr(ast):
 
 @dataclass
 class term(ast):
-    type: str
+    _type: str
     value: str
 
-@dataclass
-class indexed_var(ast):
-    name: str
-    index: ast
+# @dataclass
+# class indexed_var(ast):
+#     name: str
+#     index: ast
 
-@dataclass
-class _var(ast):
-    name: str
-    type: str
-    cat: str
+# @dataclass
+# class _var(ast):
+#     name: str
+#     _type: str
+#     cat: str

@@ -10,6 +10,8 @@ STRING_CONST=4
 IDENTIFIER=5
 BOOLEAN=6
 POINTER=7
+VAR=8
+INDEXED_VAR=9
 
 _KEYWORDS= ('class', 'constructor', 'function', 'method', 
                      'field', 'static', 'var', 'int', 'char', 'if',
@@ -83,7 +85,6 @@ class Tokenizer:
         Returns:
             str: Current token
         """
-        print(self.tokens[self.current_token_index])
         return self.tokens[self.current_token_index]
     
     @property
