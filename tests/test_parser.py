@@ -150,10 +150,6 @@ class SquareGame {
 def test_parser_basic():
     par = Parser()
     par.compile(_PROG)
-    # for line in par.out_stream:
-    #     print(line)
-    # assert par.out_stream[0] == 'function Main.main 0'
-    # assert len(par.out_stream) == 31
     assert par.ast[0].name == "Main"
     assert len(par.ast[0].lines) == 1
 
@@ -161,8 +157,6 @@ def test_parser_basic():
 def test_parser_list():
     par = Parser()
     par.compile(_LIST)
-    # for line in par.out_stream:
-    #     print(line)
     print(par.ast)
     assert par.ast[0].name == "List"
     assert len(par.ast[0].class_decls) == 2
@@ -174,8 +168,6 @@ def test_parser_list():
 def test_parser_square():
     par = Parser()
     par.compile(_SQUARE)
-    # for line in par.out_stream:
-    #     print(line)
     print(par.ast)
     assert len(par.ast) == 1
     assert isinstance(par.ast[0].class_decls[0], a.class_decl)

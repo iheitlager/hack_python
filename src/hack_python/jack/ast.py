@@ -88,14 +88,3 @@ class unary_expr(ast):
 class term(ast):
     _type: str
     value: str
-
-# @dataclass
-# class indexed_var(ast):
-#     name: str
-#     index: ast
-
-# @dataclass
-# class _var(ast):
-#     name: str
-#     _type: str
-#     cat: str
