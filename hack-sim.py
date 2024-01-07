@@ -44,7 +44,7 @@ class simulator:
     def disassemble(self, line, pc, rom):
         endloop = 0
         if len(line) < 5:
-            arg = [0,"0x0000", "0x020"]
+            arg = [0 ,str(hex(pc)) , str(hex(pc+20))]
         else:
             arg = line.split(' ')
         for addr in range(int(arg[1], 16), int(arg[2], 16)+1):
@@ -122,7 +122,7 @@ class simulator:
     def _printout(self, cpu, pc, opco):
         print("")
         for w in self.watch:
-            print(("{w:04X} " + CYELLOW + "{v:04X}" + CEND).format(w=w, v=cpu.ram[w]))
+            print(("0x{w:04X} " + CYELLOW + "{v:04X}" + CEND).format(w=w, v=cpu.ram[w]))
         print("PC     A      D      SP     LCL    ARG    OPCO   ({cycles:d})".format(cycles=cpu.cycles))
         print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{SP:04X} 0x{LCL:04X} 0x{ARG:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), SP=cpu.ram[0], LCL=cpu.ram[1], ARG=cpu.ram[2], opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
