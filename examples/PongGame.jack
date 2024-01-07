@@ -34,22 +34,22 @@ class PongGame {
 
     /** Constructs a new Pong Game. */
     constructor PongGame new() {
-	do Screen.clearScreen();
+	    do Screen.clearScreen();
 
-	let batWidth = 50;
+	    let batWidth = 50;
         let bat = Bat.new(230, 229, batWidth, 7);
 
         let ball = Ball.new(253, 222, 0, 511, 0, 229);
-	do ball.setDestination(400,0);
+	    do ball.setDestination(400,0);
 
-	do Screen.drawRectangle(0, 238, 511, 240);
-	do Output.moveCursor(22,0);
-	do Output.printString("Score: 0");
+	    do Screen.drawRectangle(0, 238, 511, 240);
+	    do Output.moveCursor(22,0);
+	    do Output.printString("Score: 0");
 	
-	let exit = false;
-	let score = 0;
-	let wall = 0;
-	let lastWall = 0;
+	    let exit = false;
+	    let score = 0;
+	    let wall = 0;
+	    let lastWall = 0;
 
         return this;
     }

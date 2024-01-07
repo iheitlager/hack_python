@@ -1,0 +1,71 @@
+// Brainfuck Program:
+// #+++[>+++++<-]>@
+// ----[---->+<]>++    # a = "A"   (idea reserve 0 and 1 for 0 and 1 >+>)
+// >+++++[>+++++<-]>+  # b = 26
+// [<<.+>>-]           # repeat print a; a++ ; b-- until b==
+class Main {
+	static Array m;  // main memory
+	static int p;  // main pointer
+	static Array l;  // loop array
+
+	function void main () {
+		let m = Array.new(1000);
+		let l = Array.new(20);
+		let p = 0;
+
+		let m[p] = m[p] - 1;
+		let m[p] = m[p] - 1;
+		let m[p] = m[p] - 1;
+		let m[p] = m[p] - 1;
+		let l[0] = true;
+		if ((m[p] & 255) = 0) { let l[0] = false; }
+		while(l[0] = true) {
+			let m[p] = m[p] - 1;
+			let m[p] = m[p] - 1;
+			let m[p] = m[p] - 1;
+			let m[p] = m[p] - 1;
+			let p = p + 1;
+			let m[p] = m[p] + 1;
+			let p = p - 1;
+			if ((m[p] & 255) = 0) { let l[0] = false; }
+		} // close while 0
+		let p = p + 1;
+		let m[p] = m[p] + 1;
+		let m[p] = m[p] + 1;
+		let p = p + 1;
+		let m[p] = m[p] + 1;
+		let m[p] = m[p] + 1;
+		let m[p] = m[p] + 1;
+		let m[p] = m[p] + 1;
+		let m[p] = m[p] + 1;
+		let l[0] = true;
+		if ((m[p] & 255) = 0) { let l[0] = false; }
+		while(l[0] = true) {
+			let p = p + 1;
+			let m[p] = m[p] + 1;
+			let m[p] = m[p] + 1;
+			let m[p] = m[p] + 1;
+			let m[p] = m[p] + 1;
+			let m[p] = m[p] + 1;
+			let p = p - 1;
+			let m[p] = m[p] - 1;
+			if ((m[p] & 255) = 0) { let l[0] = false; }
+		} // close while 0
+		let p = p + 1;
+		let m[p] = m[p] + 1;
+		let l[0] = true;
+		if ((m[p] & 255) = 0) { let l[0] = false; }
+		while(l[0] = true) {
+			let p = p - 1;
+			let p = p - 1;
+			do System.printchar(m[p]);
+			let m[p] = m[p] + 1;
+			let p = p + 1;
+			let p = p + 1;
+			let m[p] = m[p] - 1;
+			if ((m[p] & 255) = 0) { let l[0] = false; }
+		} // close while 0
+
+		return;
+	} // close function
+} // close class

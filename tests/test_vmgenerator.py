@@ -84,7 +84,7 @@ def test_gen_prog():
     par.compile(_PROG)
     gen = VMGenerator()
     gen.generate(par.ast)
-    assert len(gen.out_stream) == 31
+    assert len(gen.out_stream) == 33
     # for line in gen.out_stream:
     #     print(line)
     assert gen.out_stream[-1] == 'return'
@@ -114,7 +114,7 @@ def test_gen_instance_call():
     gen = VMGenerator()
     gen.generate(par.ast)
     pprint.pprint(gen.out_stream)
-    assert gen.out_stream[-1] != 'return'
+    assert gen.out_stream[-1] == 'return'
 
 def test_gen_array_assignment():
     res = mock_subroutine_parse("var Array a, b, c; var int size; let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
@@ -133,9 +133,10 @@ def test_gen_list():
     gen.generate(par.ast)
     for line in gen.out_stream:
         print(line)
-    assert len(gen.out_stream) == 44
+    assert len(gen.out_stream) == 50
     assert gen.out_stream[-1] == 'return'
 
+# @pytest.mark.skip(reason="used as code generator")
 def test_pong_game():
     f = open('./examples/PongGame.jack')
     p = f.read()
@@ -149,5 +150,24 @@ def test_pong_game():
     gen.generate(par.ast)
     for line in gen.out_stream:
         print(line)
-    assert len(gen.out_stream) == 44
+    assert len(gen.out_stream) == 352
+    assert gen.out_stream[-1] == 'return'
+
+
+# @pytest.mark.skip(reason="used as code generator")
+def test_brainfuck():
+    f = open('./examples/bf.jack')
+    p = f.read()
+    f.close()
+    par = Parser()
+    par.compile(p)
+    pprint.pprint(par.ast)
+    assert len(par.ast) == 1
+    gen = VMGenerator()
+    gen.generate(par.ast)
+    f = open('./examples/bf.vm', "w")
+    for line in gen.out_stream:
+        f.write(line + '\n')
+    f.close()
+    assert len(gen.out_stream) == 619
     assert gen.out_stream[-1] == 'return'
