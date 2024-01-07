@@ -1,3 +1,5 @@
+import pprint
+
 from hack_python.jack.parser import Parser
 from hack_python.jack.tokenizer import Tokenizer
 from hack_python.jack import ast as a
@@ -147,6 +149,24 @@ class SquareGame {
     }
 }'''
 
+
+_PONG_SNIPPET = '''
+if (wall = 4) {
+    let exit = (batLeft > ballRight) | (batRight < ballLeft);
+    if (~exit) {
+        if (ballRight < (batLeft + 10)) {
+            let bouncingDirection = -1;
+        }
+        else {
+            if (ballLeft > (batRight - 10)) {
+                let bouncingDirection = 1;
+            }
+        }
+    }
+}
+'''
+
+
 def test_parser_basic():
     par = Parser()
     par.compile(_PROG)
@@ -181,16 +201,41 @@ def mock_singlestms_parse(line):
     res = par.compile_statements()
     return res
 
+def mock_subroutine_parse(line):
+    tok=Tokenizer()
+    tok.tokenize("function void main() {" + line + 'return; };') # add a dummy subroutine and token
+    par = Parser(tok=tok)
+    res = par.compile_subroutine()
+    return res
+
+
 def test_singleline():
     res = mock_singlestms_parse("let c = null;")
     assert res == [a.let(var='c', expr=a.term(_type=6, value='null'))]
 
-def test_parse_array_def():
-    res = mock_singlestms_parse("var Array a, b, c; ")
-    assert res == []
+# def test_parse_array_def():
+#     res = mock_singlestms_parse("var Array a, b, c; ")
+#     assert res == []
 
 def test_parse_array_assignment():
     res = mock_singlestms_parse("let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
     assert res[0] == a.let(var=('a', a.term(_type=3, value=3)), expr=a.term(_type=3, value=2))
     assert res[1] == a.let(var='c', expr=a.term(_type=9, value=('a', a.term(_type=3, value=3))))
     assert res[2] == a.let(var=('a', a.term(_type=8, value='size')), expr=a.subroutine_call(name='Array.new', exprs=[a.term(_type=3, value=3)]))
+
+
+def test_pong_snippet():
+    res = mock_singlestms_parse(_PONG_SNIPPET)
+    pprint.pprint(res)
+    assert len(res) == 1
+
+
+def test_pong_game():
+    f = open('./examples/PongGame.jack')
+    p = f.read()
+    f.close()
+    par = Parser()
+    par.compile(p)
+    pprint.pprint(par.ast)
+    assert len(par.ast) == 1
+

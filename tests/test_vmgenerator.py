@@ -1,7 +1,7 @@
 from hack_python.jack.parser import Parser
 from hack_python.jack.vmgenerator import VMGenerator
 from hack_python.jack import ast as a
-from tests.test_parser import _PROG, _LIST, mock_singlestms_parse
+from tests.test_parser import _PROG, _LIST, mock_singlestms_parse, mock_subroutine_parse
 
 import pprint
 
@@ -52,6 +52,22 @@ _LOCAL_VAR = '''class List {
         }
 }
 '''
+
+_INSTANCE_CALL= '''
+class PongGame {
+    field Ball ball;
+
+    constructor PongGame new() {
+    	do Screen.clearScreen();
+
+        let ball = Ball.new(253, 222, 0, 511, 0, 229);
+    	do ball.setDestination(400,0);
+
+        return this;
+    }
+}
+'''
+
 def test_gen_class():
     ast = a._class('Main')
     gen = VMGenerator()
@@ -91,9 +107,17 @@ def test_gen_local_var():
     pprint.pprint(gen.out_stream)
     assert gen.out_stream[-1] == 'return'
 
+def test_gen_instance_call():
+    par = Parser()
+    par.compile(_INSTANCE_CALL)
+    pprint.pprint(par.ast)
+    gen = VMGenerator()
+    gen.generate(par.ast)
+    pprint.pprint(gen.out_stream)
+    assert gen.out_stream[-1] != 'return'
 
 def test_gen_array_assignment():
-    res = mock_singlestms_parse("var Array a, b, c; let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
+    res = mock_subroutine_parse("var Array a, b, c; var int size; let a[3] = 2;let c = a[3];let a[size] = Array.new(3);")
     pprint.pprint(res)
     gen = VMGenerator()
     gen.generate(res)
@@ -104,6 +128,22 @@ def test_gen_array_assignment():
 def test_gen_list():
     par = Parser()
     par.compile(_LIST)
+    pprint.pprint(par.ast)
+    gen = VMGenerator()
+    gen.generate(par.ast)
+    for line in gen.out_stream:
+        print(line)
+    assert len(gen.out_stream) == 44
+    assert gen.out_stream[-1] == 'return'
+
+def test_pong_game():
+    f = open('./examples/PongGame.jack')
+    p = f.read()
+    f.close()
+    par = Parser()
+    par.compile(p)
+    pprint.pprint(par.ast)
+    assert len(par.ast) == 1
     pprint.pprint(par.ast)
     gen = VMGenerator()
     gen.generate(par.ast)

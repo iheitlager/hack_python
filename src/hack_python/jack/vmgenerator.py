@@ -32,6 +32,7 @@ class VMGenerator:
         }
         self.if_count=0
         self.while_count=0
+        self.has_return = False
 
 
     def generate(self, item: a.ast) -> list[str]:
@@ -48,6 +49,7 @@ class VMGenerator:
         else:
             item.visit(self)
         return self.out_stream
+
 
     def visit(self, item: a.ast):
         match type(item):
@@ -71,6 +73,7 @@ class VMGenerator:
             case _:
                 raise NotImplementedError(item)
 
+
     def gen_class(self, item: a._class):
         self.class_name = item.name
         for decl in item.class_decls:
@@ -79,8 +82,11 @@ class VMGenerator:
         for x in item.lines:
             self.visit(x)
 
+
     def gen_subroutine(self, item: a.subroutine):
         self.symbol_table.reset()
+        self.has_return = False
+
         self.writer.write_function(item.name, len(item.locals))
 
         if item._type == 'method':
@@ -101,10 +107,14 @@ class VMGenerator:
         for x in item.lines:
             self.visit(x)
 
+        if not self.has_return:
+            raise SyntaxError('Subroutine {} return statement missing'.format(item.name))
+
 
     def gen_do(self, item: a._do):
         self.gen_subroutine_call(item.expr)
         self.writer.write_push_pop('pop', 'TEMP', 0)  # void method
+
 
     def gen_let(self, item: a.let):
         if isinstance(item.var, tuple):
@@ -132,13 +142,14 @@ class VMGenerator:
             self.gen_expr(item.expr)
             self.writer.write_push_pop('pop', cat, i)
 
+
     def gen_if(self, item: a._if):
         self.gen_expr(item.expr)
 
         # this can be cleaned in case there is no else_lines
-        l1 = "IF_TRUE{}".format(self.if_count)
-        l2 = "IF_FALSE{}".format(self.if_count)
-        l3 = "IF_END{}".format(self.if_count)
+        l1 = "IF_TRUE_{}".format(self.if_count)
+        l2 = "IF_FALSE_{}".format(self.if_count)
+        l3 = "IF_END_{}".format(self.if_count)
         self.writer.write_ifgoto(l1)
         self.writer.write_goto(l2)
         self.writer.write_label(l1)
@@ -156,11 +167,12 @@ class VMGenerator:
         
         self.writer.write_label(l3)
 
+
     def gen_while(self, item: a._while):
         """Compiles a Jack "while" statement.
         """
-        l1 = "WHILE_EXP{}".format(self.while_count)
-        l2 = "WHILE_END{}".format(self.while_count)
+        l1 = "WHILE_EXP_{}".format(self.while_count)
+        l2 = "WHILE_END_{}".format(self.while_count)
         self.while_count += 1
 
         self.writer.write_label(l1)
@@ -183,18 +195,28 @@ class VMGenerator:
         else:
             self.gen_expr(item.expr)
         self.writer.write_return()
+        self.has_return = True
+
 
     def gen_subroutine_call(self, item: a.subroutine_call):
-        _type, cat, i = self.symbol_table.get(item.name)
+        n_args = 0
+        _type, cat, i = self.symbol_table.get(item.name[0])
         if _type is not None:  # it's an instance
             cat = self.convert_kind[cat]
             self.writer.write_push_pop('push', cat, i)
-        if "." not in item.name and item.exprs:  # fix this
-            self.writer.write_push_pop('push', 'POINTER', 0)
+            func_name = "{}.{}".format(_type, item.name[1])
+            n_args += 1
+        else:
+            func_name = "{}.{}".format(*item.name)
+
+        n_args += 1
+        self.writer.write_push_pop('push', 'POINTER', 0)
         
         for expr in item.exprs:
             self.gen_expr(expr)
-        self.writer.write_call(item.name, len(item.exprs))
+        n_args += len(item.exprs)
+        self.writer.write_call(func_name, n_args)
+
 
     def gen_expr(self, item: a.ast):
         match type(item):
@@ -205,7 +227,7 @@ class VMGenerator:
             case a.unary_expr:
                 self.gen_unary_expr(item)
             case a.bin_expr:
-                self.gen_term(item.l_term)
+                self.gen_expr(item.l_term)
                 self.gen_expr(item.r_term)
                 if item.op in self.op_table:
                     self.writer.write_arithmetic(self.op_table.get(item.op))
@@ -218,12 +240,14 @@ class VMGenerator:
             case _:
                 raise NotImplementedError(item)
 
+
     def gen_unary_expr(self, item: a.unary_expr):
         self.gen_expr(item.term)
         if item.op == '-':
             self.writer.write_arithmetic('NEG')
         else:
             self.writer.write_arithmetic('NOT')        
+
 
     def gen_term(self, item: a.term):
         if item._type == tk.STRING_CONST:

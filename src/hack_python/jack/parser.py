@@ -53,7 +53,7 @@ class Parser:
             res.extend(self.compile_subroutine())
 
         if self.tk.curr_token != '}':
-            raise SyntaxError('} expected at end of class {}.'.format(self.class_name))  # noqa: F521
+            raise SyntaxError('} expected at end of class {}, got {}.'.format(self.class_name, self.tk.curr_toke))  # noqa: F521
         return res 
 
     def compile_class_var_dec(self):
@@ -239,12 +239,12 @@ class Parser:
 
         self.tk.advance("if")
         self.tk.advance("(")
-        self.compile_expression()
+        expr = self.compile_expression()
         self.tk.advance(")")
 
         self.tk.advance("{")
         lines = self.compile_statements()
-        self.tk.advance("}")  # "}"
+        self.tk.advance("}") 
 
         else_lines = []
         if self.tk.curr_token == 'else':
@@ -253,7 +253,7 @@ class Parser:
             else_lines += self.compile_statements()
             self.tk.advance("}")
         
-        return a._if(0, lines=lines, else_lines=else_lines)
+        return a._if(expr=expr, lines=lines, else_lines=else_lines)
     
     def compile_while_statement(self):
         """Compiles a Jack "while" statement.
@@ -390,19 +390,17 @@ class Parser:
         return term
               
     def compile_subroutine_call(self, var_name):
-        func_name = var_name
-
         if self.tk.curr_token == '.':
             self.tk.advance(".")  
             sub_name = self.tk.curr_token  # subroutine name
             self.tk.advance()
 
-            func_name = "{}.{}".format(var_name, sub_name)
-            
+            func_name = (var_name, sub_name)
         elif self.tk.curr_token == '(':
-            sub_name = var_name
-            func_name = "{}.{}".format(self.class_name, sub_name)
-        
+            func_name = (self.class_name, var_name)
+        else:
+            raise SyntaxError("Subroutine call expected '(' got {}".format(self.tk.curr_token))
+
         self.tk.advance("(")
         exprs = self.compile_expression_list()
         self.tk.advance(")")
