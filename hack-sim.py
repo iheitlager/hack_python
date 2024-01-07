@@ -122,9 +122,14 @@ class simulator:
     def _printout(self, cpu, pc, opco):
         print("")
         for w in self.watch:
-            print(("0x{w:04X} " + CYELLOW + "{v:04X}" + CEND).format(w=w, v=cpu.ram[w]))
-        print("PC     A      D      SP     LCL    ARG    OPCO   ({cycles:d})".format(cycles=cpu.cycles))
-        print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{SP:04X} 0x{LCL:04X} 0x{ARG:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), SP=cpu.ram[0], LCL=cpu.ram[1], ARG=cpu.ram[2], opco=opco, instr=self.dis.disass_instr(opco)))
+            v=cpu.ram[w]
+            print(("0x{:04X} " + CYELLOW + "{:04X} ({:d}, {})" + CEND).format(w, v, v, chr(v if v >= 32 and v <= 255 else 45)))
+        try:
+            M=cpu.ram[cpu.A.get()]
+        except:  # noqa: E722
+            M=0
+        print("PC     A      D      M      SP     LCL    ARG    OPCO   ({cycles:d})".format(cycles=cpu.cycles))
+        print("0x{pc:04X} 0x{a:04X} 0x{d:04X} 0x{M:04X} 0x{SP:04X} 0x{LCL:04X} 0x{ARG:04X} 0x{opco:04X}: {instr:s}".format(pc=pc, a=cpu.A.get(), d=cpu.D.get(), M=M, SP=cpu.ram[0], LCL=cpu.ram[1], ARG=cpu.ram[2], opco=opco, instr=self.dis.disass_instr(opco)))
         if self.endloop == 2: print(CRED + "Endloop detected" + CEND)
 
     def _readinput(self, cpu, pc):
