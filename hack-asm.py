@@ -44,8 +44,32 @@ def dump_bin(code_table, out, binary=True):
                 code = str(bin(c.code))[2:].zfill(16) + "\n"
             else:
                 code = str(hex(c.code))[2:].zfill(4).upper() + "\n"
+
             out.write(code)
 
+
+def dump_python(code_table, out, binary=True):
+    i = 0
+    out.write('ROM = [\n')
+    start = True
+    for c in code_table:
+        if c.code is not None:
+            start = False
+            if i == 0: 
+                out.write('\t')
+            if binary:
+                code = "0b{:016b}, ".format(c.code)
+            else:
+                code = "0x{:04X}, ".format(c.code)
+            out.write(code)
+            i += 1
+            if i == 8: 
+                out.write('\n')
+                i = 0
+        elif start:
+            out.write(c.raw.replace("//", "#") + '\n')
+    out.write('\n]\n')
+            
 
 def dump_symbols(symbol_table, out, verbose=False):
     out.write("\n\nSymbols:\n")
@@ -71,6 +95,9 @@ def main():
     )
     parser.add_argument(
         "--debug", action="store_true", help="extra debugging remarks"
+    )
+    parser.add_argument(
+        "-p", "--python", action="store_true", help="dump as python rom file"
     )
     parser.add_argument(
         "-b", "--binary", action="store_true", help="use binary in dump"
@@ -101,6 +128,8 @@ def main():
             asm.code_table, out=args.outfile, verbose=args.verbose, binary=args.binary
         )
         dump_symbols(asm.symbol_table, verbose=args.verbose, out=args.outfile)
+    elif args.python:
+        dump_python(asm.code_table, out=args.outfile, binary=args.binary)
     else:
         dump_bin(asm.code_table, out=args.outfile, binary=args.binary)
 

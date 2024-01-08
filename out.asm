@@ -10,24 +10,48 @@
 D=A
 @R5
 M=D
-// +
+// + (8bit)
+@255
+D=A
 @R5
 A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
+M=D&M
 // [
 (LOOP_0)
 @R5
@@ -38,29 +62,58 @@ D;JEQ
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
+M=D&M
 // <
 @R5
 M=M-1
-// - (opt)
+// - (8bit)
+@255
+D=A
+@R5
 A=M
 M=M-1
+M=D&M
 // ]
 @LOOP_0
 0;JMP
@@ -68,23 +121,43 @@ M=M-1
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
+M=D&M
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
+M=D&M
 // [
 (LOOP_1)
 @R5
@@ -95,23 +168,43 @@ D;JEQ
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
+M=D&M
 // <
 @R5
 M=M-1
-// - (opt)
+// - (8bit)
+@255
+D=A
+@R5
 A=M
 M=M-1
+M=D&M
 // ]
 @LOOP_1
 0;JMP
@@ -119,9 +212,13 @@ M=M-1
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
+M=D&M
 // [
 (LOOP_2)
 @R5
@@ -139,18 +236,25 @@ A=M
 D=M
 @0x4000
 M=D
-// +
+// + (8bit)
+@255
+D=A
 @R5
 A=M
 M=M+1
+M=D&M
 // >
 @R5
 M=M+1
 // > (opt)
 M=M+1
-// - (opt)
+// - (8bit)
+@255
+D=A
+@R5
 A=M
 M=M-1
+M=D&M
 // ]
 @LOOP_2
 0;JMP
@@ -158,27 +262,58 @@ M=M-1
 // >
 @R5
 M=M+1
-// + (opt)
+// + (8bit)
+@255
+D=A
+@R5
 A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
-// + (opt)
+M=D&M
+// + (8bit, opt)
+@R5
+A=M
 M=M+1
+M=D&M
 // . (opt)
 D=M
 @0x4000
