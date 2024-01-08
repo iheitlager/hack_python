@@ -18,318 +18,256 @@
 0008: FDC8        M=M+1
 0009: F008        M=D&M
 000a:                   // + (8bit, opt)
-000a: 0005        @R5
-000b: FC20        A=M
+000a: FDC8        M=M+1
+000b: F008        M=D&M
+000c:                   // + (8bit, opt)
 000c: FDC8        M=M+1
 000d: F008        M=D&M
 000e:                   // + (8bit, opt)
-000e: 0005        @R5
-000f: FC20        A=M
+000e: FDC8        M=M+1
+000f: F008        M=D&M
+0010:                   // + (8bit, opt)
 0010: FDC8        M=M+1
 0011: F008        M=D&M
 0012:                   // + (8bit, opt)
-0012: 0005        @R5
-0013: FC20        A=M
+0012: FDC8        M=M+1
+0013: F008        M=D&M
+0014:                   // + (8bit, opt)
 0014: FDC8        M=M+1
 0015: F008        M=D&M
 0016:                   // + (8bit, opt)
-0016: 0005        @R5
-0017: FC20        A=M
-0018: FDC8        M=M+1
-0019: F008        M=D&M
-001a:                   // + (8bit, opt)
-001a: 0005        @R5
-001b: FC20        A=M
-001c: FDC8        M=M+1
-001d: F008        M=D&M
-001e:                   // + (8bit, opt)
-001e: 0005        @R5
-001f: FC20        A=M
-0020: FDC8        M=M+1
-0021: F008        M=D&M
-0022:                   // + (8bit, opt)
-0022: 0005        @R5
-0023: FC20        A=M
-0024: FDC8        M=M+1
-0025: F008        M=D&M
-0026:                   // [
-0026: (LOOP_0)
-0026: 0005        @R5
-0027: FC20        A=M
-0028: FC10        D=M
-0029: 0059        @EXIT_LOOP_0
-002a: E302        D;JEQ
-002b:                   // >
-002b: 0005        @R5
-002c: FDC8        M=M+1
-002d:                   // + (8bit)
-002d: 00FF        @255
-002e: EC10        D=A
-002f: 0005        @R5
-0030: FC20        A=M
+0016: FDC8        M=M+1
+0017: F008        M=D&M
+0018:                   // [
+0018: (LOOP_0)
+0018: 0005        @R5
+0019: FC20        A=M
+001a: FC10        D=M
+001b: 003D        @EXIT_LOOP_0
+001c: E302        D;JEQ
+001d:                   // >
+001d: 0005        @R5
+001e: FDC8        M=M+1
+001f:                   // + (8bit)
+001f: 00FF        @255
+0020: EC10        D=A
+0021: 0005        @R5
+0022: FC20        A=M
+0023: FDC8        M=M+1
+0024: F008        M=D&M
+0025:                   // + (8bit, opt)
+0025: FDC8        M=M+1
+0026: F008        M=D&M
+0027:                   // + (8bit, opt)
+0027: FDC8        M=M+1
+0028: F008        M=D&M
+0029:                   // + (8bit, opt)
+0029: FDC8        M=M+1
+002a: F008        M=D&M
+002b:                   // + (8bit, opt)
+002b: FDC8        M=M+1
+002c: F008        M=D&M
+002d:                   // + (8bit, opt)
+002d: FDC8        M=M+1
+002e: F008        M=D&M
+002f:                   // + (8bit, opt)
+002f: FDC8        M=M+1
+0030: F008        M=D&M
+0031:                   // + (8bit, opt)
 0031: FDC8        M=M+1
 0032: F008        M=D&M
-0033:                   // + (8bit, opt)
+0033:                   // <
 0033: 0005        @R5
-0034: FC20        A=M
-0035: FDC8        M=M+1
-0036: F008        M=D&M
-0037:                   // + (8bit, opt)
+0034: FC88        M=M-1
+0035:                   // - (8bit)
+0035: 00FF        @255
+0036: EC10        D=A
 0037: 0005        @R5
 0038: FC20        A=M
-0039: FDC8        M=M+1
+0039: FC88        M=M-1
 003a: F008        M=D&M
-003b:                   // + (8bit, opt)
-003b: 0005        @R5
-003c: FC20        A=M
-003d: FDC8        M=M+1
-003e: F008        M=D&M
-003f:                   // + (8bit, opt)
-003f: 0005        @R5
-0040: FC20        A=M
-0041: FDC8        M=M+1
-0042: F008        M=D&M
-0043:                   // + (8bit, opt)
-0043: 0005        @R5
-0044: FC20        A=M
-0045: FDC8        M=M+1
-0046: F008        M=D&M
-0047:                   // + (8bit, opt)
-0047: 0005        @R5
-0048: FC20        A=M
-0049: FDC8        M=M+1
-004a: F008        M=D&M
-004b:                   // + (8bit, opt)
-004b: 0005        @R5
-004c: FC20        A=M
+003b:                   // ]
+003b: 0018        @LOOP_0
+003c: EA87        0;JMP
+003d: (EXIT_LOOP_0)
+003d:                   // >
+003d: 0005        @R5
+003e: FDC8        M=M+1
+003f:                   // + (8bit)
+003f: 00FF        @255
+0040: EC10        D=A
+0041: 0005        @R5
+0042: FC20        A=M
+0043: FDC8        M=M+1
+0044: F008        M=D&M
+0045:                   // >
+0045: 0005        @R5
+0046: FDC8        M=M+1
+0047:                   // + (8bit)
+0047: 00FF        @255
+0048: EC10        D=A
+0049: 0005        @R5
+004a: FC20        A=M
+004b: FDC8        M=M+1
+004c: F008        M=D&M
+004d:                   // + (8bit, opt)
 004d: FDC8        M=M+1
 004e: F008        M=D&M
-004f:                   // <
-004f: 0005        @R5
-0050: FC88        M=M-1
-0051:                   // - (8bit)
-0051: 00FF        @255
-0052: EC10        D=A
-0053: 0005        @R5
-0054: FC20        A=M
-0055: FC88        M=M-1
-0056: F008        M=D&M
-0057:                   // ]
-0057: 0026        @LOOP_0
-0058: EA87        0;JMP
-0059: (EXIT_LOOP_0)
-0059:                   // >
-0059: 0005        @R5
-005a: FDC8        M=M+1
-005b:                   // + (8bit)
-005b: 00FF        @255
-005c: EC10        D=A
-005d: 0005        @R5
-005e: FC20        A=M
-005f: FDC8        M=M+1
-0060: F008        M=D&M
-0061:                   // >
-0061: 0005        @R5
+004f:                   // + (8bit, opt)
+004f: FDC8        M=M+1
+0050: F008        M=D&M
+0051:                   // + (8bit, opt)
+0051: FDC8        M=M+1
+0052: F008        M=D&M
+0053:                   // + (8bit, opt)
+0053: FDC8        M=M+1
+0054: F008        M=D&M
+0055:                   // [
+0055: (LOOP_1)
+0055: 0005        @R5
+0056: FC20        A=M
+0057: FC10        D=M
+0058: 0074        @EXIT_LOOP_1
+0059: E302        D;JEQ
+005a:                   // >
+005a: 0005        @R5
+005b: FDC8        M=M+1
+005c:                   // + (8bit)
+005c: 00FF        @255
+005d: EC10        D=A
+005e: 0005        @R5
+005f: FC20        A=M
+0060: FDC8        M=M+1
+0061: F008        M=D&M
+0062:                   // + (8bit, opt)
 0062: FDC8        M=M+1
-0063:                   // + (8bit)
-0063: 00FF        @255
-0064: EC10        D=A
-0065: 0005        @R5
-0066: FC20        A=M
-0067: FDC8        M=M+1
-0068: F008        M=D&M
-0069:                   // + (8bit, opt)
-0069: 0005        @R5
-006a: FC20        A=M
-006b: FDC8        M=M+1
-006c: F008        M=D&M
-006d:                   // + (8bit, opt)
-006d: 0005        @R5
-006e: FC20        A=M
-006f: FDC8        M=M+1
-0070: F008        M=D&M
-0071:                   // + (8bit, opt)
-0071: 0005        @R5
-0072: FC20        A=M
-0073: FDC8        M=M+1
-0074: F008        M=D&M
-0075:                   // + (8bit, opt)
-0075: 0005        @R5
-0076: FC20        A=M
-0077: FDC8        M=M+1
-0078: F008        M=D&M
-0079:                   // [
-0079: (LOOP_1)
-0079: 0005        @R5
-007a: FC20        A=M
-007b: FC10        D=M
-007c: 00A0        @EXIT_LOOP_1
-007d: E302        D;JEQ
-007e:                   // >
-007e: 0005        @R5
-007f: FDC8        M=M+1
-0080:                   // + (8bit)
-0080: 00FF        @255
-0081: EC10        D=A
-0082: 0005        @R5
-0083: FC20        A=M
-0084: FDC8        M=M+1
-0085: F008        M=D&M
-0086:                   // + (8bit, opt)
-0086: 0005        @R5
-0087: FC20        A=M
-0088: FDC8        M=M+1
-0089: F008        M=D&M
-008a:                   // + (8bit, opt)
+0063: F008        M=D&M
+0064:                   // + (8bit, opt)
+0064: FDC8        M=M+1
+0065: F008        M=D&M
+0066:                   // + (8bit, opt)
+0066: FDC8        M=M+1
+0067: F008        M=D&M
+0068:                   // + (8bit, opt)
+0068: FDC8        M=M+1
+0069: F008        M=D&M
+006a:                   // <
+006a: 0005        @R5
+006b: FC88        M=M-1
+006c:                   // - (8bit)
+006c: 00FF        @255
+006d: EC10        D=A
+006e: 0005        @R5
+006f: FC20        A=M
+0070: FC88        M=M-1
+0071: F008        M=D&M
+0072:                   // ]
+0072: 0055        @LOOP_1
+0073: EA87        0;JMP
+0074: (EXIT_LOOP_1)
+0074:                   // >
+0074: 0005        @R5
+0075: FDC8        M=M+1
+0076:                   // + (8bit)
+0076: 00FF        @255
+0077: EC10        D=A
+0078: 0005        @R5
+0079: FC20        A=M
+007a: FDC8        M=M+1
+007b: F008        M=D&M
+007c:                   // [
+007c: (LOOP_2)
+007c: 0005        @R5
+007d: FC20        A=M
+007e: FC10        D=M
+007f: 0099        @EXIT_LOOP_2
+0080: E302        D;JEQ
+0081:                   // <
+0081: 0005        @R5
+0082: FC88        M=M-1
+0083:                   // < (opt)
+0083: FC88        M=M-1
+0084:                   // . (opt)
+0084: FC20        A=M
+0085: FC10        D=M
+0086: 4000        @0x4000
+0087: E308        M=D
+0088:                   // + (8bit)
+0088: 00FF        @255
+0089: EC10        D=A
 008a: 0005        @R5
 008b: FC20        A=M
 008c: FDC8        M=M+1
 008d: F008        M=D&M
-008e:                   // + (8bit, opt)
+008e:                   // >
 008e: 0005        @R5
-008f: FC20        A=M
+008f: FDC8        M=M+1
+0090:                   // > (opt)
 0090: FDC8        M=M+1
-0091: F008        M=D&M
-0092:                   // + (8bit, opt)
-0092: 0005        @R5
-0093: FC20        A=M
-0094: FDC8        M=M+1
-0095: F008        M=D&M
-0096:                   // <
-0096: 0005        @R5
-0097: FC88        M=M-1
-0098:                   // - (8bit)
-0098: 00FF        @255
-0099: EC10        D=A
-009a: 0005        @R5
-009b: FC20        A=M
-009c: FC88        M=M-1
-009d: F008        M=D&M
-009e:                   // ]
-009e: 0079        @LOOP_1
-009f: EA87        0;JMP
-00a0: (EXIT_LOOP_1)
-00a0:                   // >
-00a0: 0005        @R5
+0091:                   // - (8bit)
+0091: 00FF        @255
+0092: EC10        D=A
+0093: 0005        @R5
+0094: FC20        A=M
+0095: FC88        M=M-1
+0096: F008        M=D&M
+0097:                   // ]
+0097: 007C        @LOOP_2
+0098: EA87        0;JMP
+0099: (EXIT_LOOP_2)
+0099:                   // >
+0099: 0005        @R5
+009a: FDC8        M=M+1
+009b:                   // + (8bit)
+009b: 00FF        @255
+009c: EC10        D=A
+009d: 0005        @R5
+009e: FC20        A=M
+009f: FDC8        M=M+1
+00a0: F008        M=D&M
+00a1:                   // + (8bit, opt)
 00a1: FDC8        M=M+1
-00a2:                   // + (8bit)
-00a2: 00FF        @255
-00a3: EC10        D=A
-00a4: 0005        @R5
-00a5: FC20        A=M
-00a6: FDC8        M=M+1
-00a7: F008        M=D&M
-00a8:                   // [
-00a8: (LOOP_2)
-00a8: 0005        @R5
-00a9: FC20        A=M
-00aa: FC10        D=M
-00ab: 00C5        @EXIT_LOOP_2
-00ac: E302        D;JEQ
-00ad:                   // <
-00ad: 0005        @R5
-00ae: FC88        M=M-1
-00af:                   // < (opt)
-00af: FC88        M=M-1
-00b0:                   // . (opt)
-00b0: FC20        A=M
-00b1: FC10        D=M
-00b2: 4000        @0x4000
-00b3: E308        M=D
-00b4:                   // + (8bit)
-00b4: 00FF        @255
-00b5: EC10        D=A
-00b6: 0005        @R5
-00b7: FC20        A=M
-00b8: FDC8        M=M+1
-00b9: F008        M=D&M
-00ba:                   // >
-00ba: 0005        @R5
-00bb: FDC8        M=M+1
-00bc:                   // > (opt)
-00bc: FDC8        M=M+1
-00bd:                   // - (8bit)
-00bd: 00FF        @255
-00be: EC10        D=A
-00bf: 0005        @R5
-00c0: FC20        A=M
-00c1: FC88        M=M-1
-00c2: F008        M=D&M
-00c3:                   // ]
-00c3: 00A8        @LOOP_2
-00c4: EA87        0;JMP
-00c5: (EXIT_LOOP_2)
-00c5:                   // >
-00c5: 0005        @R5
-00c6: FDC8        M=M+1
-00c7:                   // + (8bit)
-00c7: 00FF        @255
-00c8: EC10        D=A
-00c9: 0005        @R5
-00ca: FC20        A=M
-00cb: FDC8        M=M+1
-00cc: F008        M=D&M
-00cd:                   // + (8bit, opt)
-00cd: 0005        @R5
-00ce: FC20        A=M
-00cf: FDC8        M=M+1
-00d0: F008        M=D&M
-00d1:                   // + (8bit, opt)
-00d1: 0005        @R5
-00d2: FC20        A=M
-00d3: FDC8        M=M+1
-00d4: F008        M=D&M
-00d5:                   // + (8bit, opt)
-00d5: 0005        @R5
-00d6: FC20        A=M
-00d7: FDC8        M=M+1
-00d8: F008        M=D&M
-00d9:                   // + (8bit, opt)
-00d9: 0005        @R5
-00da: FC20        A=M
-00db: FDC8        M=M+1
-00dc: F008        M=D&M
-00dd:                   // + (8bit, opt)
-00dd: 0005        @R5
-00de: FC20        A=M
-00df: FDC8        M=M+1
-00e0: F008        M=D&M
-00e1:                   // + (8bit, opt)
-00e1: 0005        @R5
-00e2: FC20        A=M
-00e3: FDC8        M=M+1
-00e4: F008        M=D&M
-00e5:                   // + (8bit, opt)
-00e5: 0005        @R5
-00e6: FC20        A=M
-00e7: FDC8        M=M+1
-00e8: F008        M=D&M
-00e9:                   // + (8bit, opt)
-00e9: 0005        @R5
-00ea: FC20        A=M
-00eb: FDC8        M=M+1
-00ec: F008        M=D&M
-00ed:                   // + (8bit, opt)
-00ed: 0005        @R5
-00ee: FC20        A=M
-00ef: FDC8        M=M+1
-00f0: F008        M=D&M
-00f1:                   // . (opt)
-00f1: FC10        D=M
-00f2: 4000        @0x4000
-00f3: E308        M=D
-00f4:                   // end
-00f4: (END)
-00f4: 00F4        @END
-00f5: EA87        0;JMP
+00a2: F008        M=D&M
+00a3:                   // + (8bit, opt)
+00a3: FDC8        M=M+1
+00a4: F008        M=D&M
+00a5:                   // + (8bit, opt)
+00a5: FDC8        M=M+1
+00a6: F008        M=D&M
+00a7:                   // + (8bit, opt)
+00a7: FDC8        M=M+1
+00a8: F008        M=D&M
+00a9:                   // + (8bit, opt)
+00a9: FDC8        M=M+1
+00aa: F008        M=D&M
+00ab:                   // + (8bit, opt)
+00ab: FDC8        M=M+1
+00ac: F008        M=D&M
+00ad:                   // + (8bit, opt)
+00ad: FDC8        M=M+1
+00ae: F008        M=D&M
+00af:                   // + (8bit, opt)
+00af: FDC8        M=M+1
+00b0: F008        M=D&M
+00b1:                   // + (8bit, opt)
+00b1: FDC8        M=M+1
+00b2: F008        M=D&M
+00b3:                   // . (opt)
+00b3: FC10        D=M
+00b4: 4000        @0x4000
+00b5: E308        M=D
+00b6:                   // end
+00b6: (END)
+00b6: 00B6        @END
+00b7: EA87        0;JMP
 
 
 Symbols:
 R5        : 0005
-LOOP_0    : 0026
-EXIT_LOOP_0: 0059
-LOOP_1    : 0079
-EXIT_LOOP_1: 00a0
-LOOP_2    : 00a8
-EXIT_LOOP_2: 00c5
-END       : 00f4
+LOOP_0    : 0018
+EXIT_LOOP_0: 003d
+LOOP_1    : 0055
+EXIT_LOOP_1: 0074
+LOOP_2    : 007c
+EXIT_LOOP_2: 0099
+END       : 00b6

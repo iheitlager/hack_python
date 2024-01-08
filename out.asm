@@ -18,38 +18,24 @@ A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // [
@@ -70,38 +56,24 @@ A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // <
@@ -139,23 +111,15 @@ A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // [
@@ -176,23 +140,15 @@ A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // <
@@ -270,48 +226,30 @@ A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // + (8bit, opt)
-@R5
-A=M
 M=M+1
 M=D&M
 // . (opt)
