@@ -15,7 +15,7 @@ class WriteOnlyException(Exception):
 
 def parse_rom(values, length, width=16):
     mask = create_mask(width)
-    mem = [0x0000]*lengthß
+    mem = [0x0000]*length
     i = 0
     for value in values[0:length]:
         if isinstance(value, str):

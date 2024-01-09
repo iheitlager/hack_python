@@ -37,10 +37,10 @@ INSTRUCTION_SET = [
     (0b011_1010, "-1", lambda m: HACK_MASK),
 
     # A,D instructions (a=0)
-    (0b000_1100, "D", lambda m: HACK_MASK & m.D.get()),
-    (0b011_0000, "A", lambda m: m.A.get() & HACK_MASK),
-    (0b000_1101, "!D", lambda m: (m.D.get() & HACK_MASK) ^ HACK_MASK),  
-    (0b011_0001, "!A", lambda m: (HACK_MASK & m.A.get()) ^ HACK_MASK),
+    (0b000_1100, "D", lambda m: m.D.get()),
+    (0b011_0000, "A", lambda m: m.A.get()),
+    (0b000_1101, "!D", lambda m: m.D.get() ^ HACK_MASK),  
+    (0b011_0001, "!A", lambda m: m.A.get() ^ HACK_MASK),
     (0b000_1111, "-D", lambda m: (m.D.get() + HACK_MASK) ^ HACK_MASK),  
     (0b011_0011, "-A", lambda m: (HACK_MASK + m.A.get()) ^ HACK_MASK),
     (0b001_1111, ["D+1", "1+D"], lambda m: ((m.D.get() ^ HACK_MASK) + HACK_MASK) ^ HACK_MASK),
