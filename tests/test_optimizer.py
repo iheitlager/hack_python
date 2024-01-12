@@ -1,3 +1,4 @@
+import pprint
 from hack_python.hack import optimizer as opt
 
 
@@ -16,6 +17,10 @@ def test_rewriterules3():
     opt.rule_rewriter().rewrite(_in)
     assert _in == ['M=M+1', 'M=M+1', 'M=M+1', 'DM=D&M', '@0x4000']
 
+def test_parse_patter():
+    rw = opt.rule_rewriter()
+    pprint.pprint(rw.rules)
+    assert len(rw.rules) == 4
 
 def test_redundant_stmt1():
     _in = ['@255', 'D=A', '@R5', 'A=M', 'M=M+1', 'M=D&M', '@255', 'D=A', '@R5']

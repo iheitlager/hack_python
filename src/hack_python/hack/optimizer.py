@@ -1,3 +1,5 @@
+import string
+
 ### First optimizer, rule based
 # RULES_OLD = {
 #     ('M=M+1', 'M=D&M', 'M=M+1'): ('M=M+1', 'M=M+1', 'M=D&M'),
@@ -14,23 +16,46 @@ RULES = {
     'M=D&M;M=D&M': 'M=D&M',
     'M=D&M;D=M': 'DM=D&M',
     'M=D&M;DM=D&M': 'DM=D&M',
+    '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
 }
 
 class rule_rewriter:
     def __init__(self):
         self.rules = []
         for pattern, alt in RULES.items():
-            self.rules.append((pattern.split(';'), alt.split(';'))) 
+            pattern, vars = self._parse_pattern(pattern)
+            alt = self._parse_alt(alt, vars)
+            if not vars:
+                self.rules.append((pattern, alt, 1, [])) 
+            else:
+                self.rules.append((pattern, alt, 2, vars)) 
+
+    def _parse_pattern(self, pattern):
+        f = string.Formatter()
+        vars = []
+        for txt, var, _, _ in f.parse(pattern):
+            if var:
+                vars.append(var)
+        pattern = pattern.split(';')
+        return pattern, vars
+
+    def _parse_alt(self, alt, vars):
+        f = string.Formatter()
+        for txt, var, _, _ in f.parse(alt):
+            if var and var not in vars:
+                raise SyntaxError("var {} not in pattern".format(var))
+        alt = alt.split(';')
+        return alt
 
     def rewrite(self, lines):
         matched = True
         while matched:
             matched = False
             for i in range(len(lines)):
-                for pattern, alt in self.rules:
+                for pattern, alt, _type, vars in self.rules:
                     l = len(pattern)
                     if i <= len(lines)-l:
-                        if lines[i:i+l] == list(pattern):
+                        if _type == 1 and lines[i:i+l] == list(pattern):
                             lines[i:i+l] = list(alt)
                             matched = True
 
