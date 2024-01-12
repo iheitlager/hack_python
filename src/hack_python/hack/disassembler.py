@@ -36,9 +36,9 @@ class disassembler:
         op, operand = self._decode(i)
         if op == 0:         # A instruction
             if self.verbose:
-                return CBLUE + "@0x{operand:04X}".format(operand=operand) + CEND
+                return CBLUE + "@{:#06x}".format(operand) + CEND
             else:
-                return "@0x{operand:04X}".format(operand=operand)
+                return "@{:#06x}".format(operand)
         else:              # C instruction
             try:
                 comp = self.opcodes[operand[0]]

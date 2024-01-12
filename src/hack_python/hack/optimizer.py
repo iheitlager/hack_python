@@ -17,28 +17,33 @@ RULES = {
     'M=D&M;D=M': 'DM=D&M',
     'M=D&M;DM=D&M': 'DM=D&M',
     '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
-    '@R$x;M=M+1;@$x;D=A': '@$y;D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
+    # '@R$x;M=M+1;@$x;D=A': '@$y;D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
 }
+
+_ = None
 
 class rule_rewriter:
     def __init__(self):
         self.rules = []
         for pattern, alt in RULES.items():
-            pattern, vars = self._parse_pattern(pattern)
+            pattern, prefix, vars = self._parse_pattern(pattern)
             alt = self._parse_alt(alt, vars)
             if not vars:
-                self.rules.append((pattern, alt, 1, [])) 
+                self.rules.append((pattern, alt, 1, pattern[0], [])) 
             else:
-                self.rules.append((pattern, alt, 2, vars)) 
+                self.rules.append((pattern, alt, 2, prefix, vars)) 
 
     def _parse_pattern(self, pattern):
         f = string.Formatter()
         vars = []
+        prefix = ""
         for txt, var, _, _ in f.parse(pattern):
             if var:
                 vars.append(var)
+            if not prefix:
+                prefix = txt
         pattern = pattern.split(';')
-        return pattern, vars
+        return pattern, prefix, vars
 
     def _parse_alt(self, alt, vars):
         f = string.Formatter()
@@ -48,18 +53,29 @@ class rule_rewriter:
         alt = alt.split(';')
         return alt
 
+    def replace(self, lines, pattern, alt, vars):
+        f = string.Formatter()
+        l = ";".join(lines)
+        i, j = 0,0
+        d = {}
+        pats = f.parse(";".join(pattern))
+        
+        
+
+
     def rewrite(self, lines):
         matched = True
         while matched:
             matched = False
             for i in range(len(lines)):
-                for pattern, alt, _type, vars in self.rules:
+                for pattern, alt, _type, prefix, vars in self.rules:
                     l = len(pattern)
                     if i <= len(lines)-l:
                         if _type == 1 and lines[i:i+l] == list(pattern):
                             lines[i:i+l] = list(alt)
                             matched = True
-
+                        elif _type == 2 and lines[i].startswith(prefix):
+                            matched = self.replace(lines[i:i+l], pattern, alt, vars)
 
 ### Second optimizer
 def  redundant_stmts(lines):    

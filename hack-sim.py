@@ -2,7 +2,8 @@ import argparse
 import sys
 import os
 import readline  # noqa: F401
-from hack_python import IO, disassemble
+from hack_python.hack import disassembler
+from hack_python import IO
 from hack_python.CPU import CPU, Storage, RamSegment, parse_rom
 
 
@@ -24,7 +25,7 @@ class simulator:
     def __init__(self, verbose=False):
         self.breakpoints = []
         self.watch = []
-        self.dis = disassemble.disassembler(verbose=verbose)
+        self.dis = disassembler.disassembler(verbose=verbose)
         self.verbose = verbose
         self.go = -1
         self.i = 0
@@ -54,12 +55,12 @@ class simulator:
             elif endloop != 2: endloop = 0
             instr = self.dis.disass_instr(opco)
             if addr in self.breakpoints:
-                dis_str = CRED + "{addr:04X}" + CEND + ":{p}{opco:04X} {instr}"
+                dis_str = CRED + "{addr:#06x}" + CEND + ":{p}{opco:04X} {instr}"
             elif endloop == 2:
-                dis_str = CRED + "{addr:04X}:{p}{opco:04X} {instr} // detected endloop" + CEND
+                dis_str = CRED + "{addr:#06x}:{p}{opco:04X} {instr} // detected endloop" + CEND
                 endloop = 0
             else:
-                dis_str = "{addr:04X}:{p}{opco:04X} {instr}"
+                dis_str = "{addr:#06X}:{p}{opco:04X} {instr}"
             p = '>' if addr == pc else ' '
             print(dis_str.format(addr=addr, p=p, opco=opco, instr=instr))
 
