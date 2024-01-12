@@ -32,7 +32,6 @@ def main():
     opt = optimizer.optimizer()
     opt.optimize(lines)
 
-
     for line in opt.lines:
         args.outfile.write(line + '\n')
 

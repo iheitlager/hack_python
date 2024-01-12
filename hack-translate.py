@@ -1,6 +1,6 @@
 import argparse
 import sys
-from hack_python.vmtranslator import VMTranslator
+from hack_python.vm.vmtranslator import VMTranslator
 
 
 def main():

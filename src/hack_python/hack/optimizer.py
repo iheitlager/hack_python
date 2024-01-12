@@ -17,6 +17,7 @@ RULES = {
     'M=D&M;D=M': 'DM=D&M',
     'M=D&M;DM=D&M': 'DM=D&M',
     '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
+    '@R$x;M=M+1;@$x;D=A': '@$y;D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
 }
 
 class rule_rewriter:

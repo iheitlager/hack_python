@@ -1,4 +1,4 @@
-from hack_python.vmtranslator import VMTranslator
+from hack_python.vm.vmtranslator import VMTranslator
 
 
 _PROG = '''function Main.main 0
