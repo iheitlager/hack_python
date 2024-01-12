@@ -1,6 +1,6 @@
 import argparse
 import sys
-from hack_python import disassemble
+from hack_python import disassembler
 
 def main():
     parser = argparse.ArgumentParser(description="A Python based Hack from nand2tetris disassembler")
@@ -9,13 +9,13 @@ def main():
     parser.add_argument(
         "file", nargs="?", type=argparse.FileType("r"), default=sys.stdin, help="file to assemble or use stdin"
     )
-    parser.add_argument("-b", "--binary", action="store_true", help="use binary in dump")
+    parser.add_argument("-b", "--binary", action="store_true", help="read from binary")
     parser.add_argument(
         "-o", "--outfile", type=argparse.FileType("w"), default=sys.stdout, help="file to output or use stdout"
     )
 
     args = parser.parse_args()
-    dis = disassemble.disassembler(verbose=args.verbose, binary=args.binary)
+    dis = disassembler.disassembler(verbose=args.verbose, binary=args.binary)
 
     lines = args.file.readlines()
     args.outfile.writelines(dis.disassemble(lines))

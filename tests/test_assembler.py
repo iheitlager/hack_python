@@ -1,7 +1,8 @@
-from hack_python import assemble, disassemble
+from hack_python.hack import disassembler
+from hack_python.hack import assembler
 
 def test_lines():
-    ass = assemble.assembler()
+    ass = assembler.assembler()
 
     assert ass._translate_line("0;JMP").code  == 0b1110_1010_1000_0111
     assert ass._translate_line("M=1").code    == 0b1110_1111_1100_1000
@@ -12,12 +13,12 @@ def test_lines():
     assert ass._translate_line("M=1+D").code  == 0b1110_0111_1100_1000     
 
 def test_opcodes_length():
-    ass = assemble.assembler()
+    ass = assembler.assembler()
     assert len(ass.opcodes) == 37
 
 def test_store_in_assembler():
-    ass = assemble.assembler()
-    dis = disassemble.disassembler()
+    ass = assembler.assembler()
+    dis = disassembler.disassembler()
     for i in range(8):
         dest = ""
         if i & 0b100: dest += "A"   # order is relevant
@@ -29,7 +30,7 @@ def test_store_in_assembler():
         assert dest == out2
 
 def test_jmp_in_assembler():
-    dis = disassemble.disassembler()
-    ass = assemble.assembler()
+    dis = disassembler.disassembler()
+    ass = assembler.assembler()
     for i in range(8):
         assert i == ass.jumpcodes[dis.jumpcodes[i]]

@@ -1,8 +1,8 @@
 import re
 import sys
 
-from . import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, JUMP_OPTIONS, INSTRUCTION_SET
-from .CPU import IllegalOperand
+from hack_python import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, JUMP_OPTIONS, INSTRUCTION_SET
+from hack_python.CPU import IllegalOperand
 
 def to_int(value):
     if value[0:2] == '0b': return int(value, 2)

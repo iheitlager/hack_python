@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from hack_python import assemble
+from hack_python.hack import assembler
 
 CEND = "\33[0m"
 
@@ -118,7 +118,7 @@ def main():
     )
     args = parser.parse_args()
 
-    asm = assemble.assembler(debug=args.debug)
+    asm = assembler.assembler(debug=args.debug)
     lines = args.file.readlines()
     asm.pass_one(lines)
     asm.pass_two(lines)

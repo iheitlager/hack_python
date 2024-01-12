@@ -1,55 +1,80 @@
 ### First optimizer, rule based
+# RULES_OLD = {
+#     ('M=M+1', 'M=D&M', 'M=M+1'): ('M=M+1', 'M=M+1', 'M=D&M'),
+#     ('M=D&M', 'M=D&M'): ('M=D&M', ),
+#     ('M=D&M', 'D=M'): ('DM=D&M', ),
+#     ('M=D&M', 'DM=D&M'): ('DM=D&M', ),
+#     ('@R5', 'M=M+1', '@255', 'D=A'): ('@255', 'D=A', '@R5', 'M=M+1'),
+#     ('M=M+1', 'M=M+1', '@255', 'D=A'): ('M=M+1', '@255', 'D=A', 'M=M+1'),
+#     ('@R5', 'M=M+1', '@R5'): ('@255', 'D=A', '@R5', 'M=M+1'),
+# }
+
 RULES = {
-    ('M=M+1', 'M=D&M', 'M=M+1'): ('M=M+1', 'M=M+1', 'M=D&M'),
-    ('M=D&M', 'M=D&M'): ('M=D&M', ),
-    ('M=D&M', 'D=M'): ('DM=D&M', ),
-    ('M=D&M', 'DM=D&M'): ('DM=D&M', ),
-    ('@R5', 'M=M+1', '@255', 'D=A'): ('@255', 'D=A', '@R5', 'M=M+1'),
-    ('M=M+1', 'M=M+1', '@255', 'D=A'): ('M=M+1', '@255', 'D=A', 'M=M+1'),
-    ('@R5', 'M=M+1', '@R5'): ('@255', 'D=A', '@R5', 'M=M+1'),
+    'M=M+1;M=D&M;M=M+1': 'M=M+1;M=M+1;M=D&M',
+    'M=D&M;M=D&M': 'M=D&M',
+    'M=D&M;D=M': 'DM=D&M',
+    'M=D&M;DM=D&M': 'DM=D&M',
 }
 
-def rule_rewriter(lines):
-    matched = True
-    while matched:
-        matched = False
-        for i in range(len(lines)):
-            for pattern, alt in RULES.items():
-                l = len(pattern)
-                if i <= len(lines)-l:
-                    if lines[i:i+l] == list(pattern):
-                        lines[i:i+l] = list(alt)
-                        matched = True
+class rule_rewriter:
+    def __init__(self):
+        self.rules = []
+        for pattern, alt in RULES.items():
+            self.rules.append((pattern.split(';'), alt.split(';'))) 
+
+    def rewrite(self, lines):
+        matched = True
+        while matched:
+            matched = False
+            for i in range(len(lines)):
+                for pattern, alt in self.rules:
+                    l = len(pattern)
+                    if i <= len(lines)-l:
+                        if lines[i:i+l] == list(pattern):
+                            lines[i:i+l] = list(alt)
+                            matched = True
 
 
 ### Second optimizer
-def  redundant_stmts(lines):
-    A = ""
-    D = ""
-    M = ""
-    
+def  redundant_stmts(lines):    
     matched = True
     while matched:
         matched = False
-        for i in range(len(lines)):
-            line = lines[i]
-            if i < len(lines)-1:
-                if lines[i][0] == '@' and lines[i+1][0] == '@':
-                    A = lines[i+1][1:]
-                    lines.pop(i)
-                    matched = True
-            elif line[0] == '@' and A == line[1:]:
+        A = ""
+        D = ""
+        M = ""
+        i = 0
+        while i < len(lines):
+            cur = lines[i]
+            if i < len(lines)-1 and lines[i][0] == '@' and lines[i+1][0] == '@':
+                A = lines[i+1][1:]
                 lines.pop(i)
                 matched = True
-            elif line[0] == '@':
-                A = line[1:]
-            elif line == 'D=A' and D == A:
+            elif cur[0] == '@' and A == cur[1:]:
                 lines.pop(i)
                 matched = True
-            elif line == 'D=A':
+            elif cur[0] == '@':
+                A = cur[1:]
+                i += 1
+            elif cur == 'D=A' and D == A:
+                lines.pop(i)
+                matched = True
+            elif cur == 'D=A':
                 D = A
-            elif line == 'A=M':
+                i += 1
+            elif cur == 'A=M':
                 A = '*'+A
+                i += 1
+            elif cur[0:2] == 'A=':
+                A = cur[2:]
+                i += 1
+            elif cur[0:2] == 'D=':
+                D = cur[2:]
+                i += 1
+            else:
+                i += 1
+
+
 
 # Data class for the CFG
 class block:
@@ -103,7 +128,7 @@ class optimizer:
         for b in self.blocks:
             b.do_stats()
 
-    OPTIMIZERS = [rule_rewriter, redundant_stmts]
+    OPTIMIZERS = [rule_rewriter().rewrite, redundant_stmts]
     def optimize(self, lines):
         self.read_blocks(lines)
         for mech in self.OPTIMIZERS:

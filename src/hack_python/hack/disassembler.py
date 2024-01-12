@@ -1,5 +1,5 @@
-from . import JUMP_OPTIONS, INSTRUCTION_SET
-from .CPU import IllegalOperand
+from hack_python import JUMP_OPTIONS, INSTRUCTION_SET
+from hack_python.CPU import IllegalOperand
 
 CBLUE = '\033[94m'
 CEND = '\033[0m'

@@ -25,14 +25,14 @@ def test_decode_c_instruction():
     assert cpu._decode(0b0000_0000_0000_0000) == (0x0, 0)  # @0
     assert cpu._decode(0b0111_1111_1111_1111) == (0x0, 0x7FFF)  # @0x7FFF
     assert cpu._decode(0b1110_1010_1000_0111) == (0xE, (0b010_1010, 0, 7))  # 0;JMP
-    assert cpu._decode(0b1110_1111_1100_1000) == (0xE, (0b011_1111, 1, 0))  # M=1
+    assert cpu._decode(0b1110_1111_1100_1000) == (0xE, (0b011_1111, 1, 0))  # D=1
     assert cpu._decode(0b1111_1100_0001_0000) == (0xF, (0b111_0000, 2, 0))  # D=M
     assert cpu._decode(0b1111_0000_1000_1000) == (0xF, (0b100_0010, 1, 0))  # M=M+D
     assert cpu._decode(0b1111_1100_1010_1000) == (0xF, (0b111_0010, 5, 0))  # AM=M-1
 
 
 _=random.randint(1, 100)
-# mnemonic, A, B, M=ram[A], res
+# mnemonic, A, D, M=ram[A], res
 test_cases = [
     ["1" ,_ ,_ ,_ ,1],
     ["-1" ,_ ,_ ,_ ,0xFFFF],
