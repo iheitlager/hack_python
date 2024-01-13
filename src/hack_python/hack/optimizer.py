@@ -17,7 +17,7 @@ RULES = {
     'M=D&M;D=M': 'DM=D&M',
     'M=D&M;DM=D&M': 'DM=D&M',
     '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
-    # '@R$x;M=M+1;@$x;D=A': '@$y;D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
+    'M=M+1;M=M+1;@{x};D=A': 'M=M+1;@{x};D=A;M=M+1', # M=M+1;M=M+1;@R5;D=A => M=M+1;@R5;D=A;M=M+1
 }
 
 _ = None
@@ -26,25 +26,25 @@ class rule_rewriter:
     def __init__(self):
         self.rules = []
         for tpattern, talt in RULES.items():
-            lpattern, prefix, vars, pats = self._parse_pattern(tpattern)
+            lpattern, prefix, vars, parms = self._parse_pattern(tpattern)
             lalt = self._parse_alt(talt, vars)
             if not vars:
                 self.rules.append((lpattern, lalt, 1, None, None)) 
             else:
-                self.rules.append((lpattern, lalt, 2, prefix, (vars, tpattern, talt, pats))) 
+                self.rules.append((lpattern, lalt, 2, prefix, parms)) 
 
     def _parse_pattern(self, pattern):
         f = string.Formatter()
         vars = []
-        pats = list(f.parse(pattern))
+        pat = list(f.parse(pattern))
         prefix = ""
-        for txt, var, _, _ in pats:
+        for txt, var, _, _ in pat:
             if var and var not in vars:
                 vars.append(var)
             if not prefix:
                 prefix = txt
         pattern = pattern.split(';')
-        return pattern, prefix, vars, pats
+        return pattern, prefix, vars, pat
 
     def _parse_alt(self, alt, vars):
         f = string.Formatter()
@@ -54,49 +54,52 @@ class rule_rewriter:
         alt = alt.split(';')
         return alt
 
-    def replace(self, lines, pattern, alt, pars):
-        vars, tpattern, talt, pats = pars
+    def match(self, lines, pat):
         line = ';'.join(lines)
         dic = {}
         p = 0
         i, j = 0,0
-        while p < len(pats):
-            i = i + len(pats[p][0])
-            if p+1 >= len(pats):
+        while p < len(pat):
+            i = i + len(pat[p][0])
+            if p+1 >= len(pat):
                 j = len(line)
             else:
                 j = i
-                while line[j] != pats[p+1][0][0]:
+                while line[j] != pat[p+1][0][0]:
                     j += 1
-            if pats[p][1]:
-                if pats[p][1] not in dic:
-                    dic[pats[p][1]] = line[i:j]
+            if pat[p][1]:
+                if pat[p][1] not in dic:
+                    dic[pat[p][1]] = line[i:j]
                 i += 1
             p += 1
-        a = [x.format(**dic) for x in alt]
+        return dic
+
+    def replace(self, pattern, alt, dic):
         p = [x.format(**dic) for x in pattern]
-        if lines == p:
-            lines = a
-            return True
-        return False            
-        
+        a = [x.format(**dic) for x in alt]
+        return p, a  
+
 
     def rewrite(self, lines):
         matched = True
         while matched:
             matched = False
             for i in range(len(lines)):
-                for pattern, alt, _type, prefix, pars in self.rules:
+                for pattern, alt, _type, prefix, parms in self.rules:
                     l = len(pattern)
                     if i <= len(lines)-l:
                         if _type == 1 and lines[i:i+l] == list(pattern):
                             lines[i:i+l] = list(alt)
                             matched = True
                         elif _type == 2 and lines[i].startswith(prefix):
-                            matched = self.replace(lines[i:i+l], pattern, alt, pars)
+                            dic = self.match(lines[i:i+l], parms)
+                            pattern, alt = self.replace(pattern, alt, dic)
+                            if lines[i:i+l] == pattern:
+                                lines[i:i+l] = alt
+                                matched = True
 
 ### Second optimizer
-def  redundant_stmts(lines):    
+def redundant_stmts(lines):    
     matched = True
     while matched:
         matched = False

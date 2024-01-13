@@ -20,39 +20,28 @@ def test_rewriterules3():
 def test_parse_pattern():
     rw = opt.rule_rewriter()
     pprint.pprint(rw.rules[4])
-    assert len(rw.rules[4]) == 4
-
-def find_vars(line, pats):
-    dic = {}
-    p = 0
-    i, j = 0,0
-    while p < len(pats):
-        i = i + len(pats[p][0])
-        if p+1 >= len(pats):
-            j = len(line)
-        else:
-            j = i
-            while line[j] != pats[p+1][0][0]:
-                j += 1
-        if pats[p][1]:
-            if pats[p][1] not in dic:
-                dic[pats[p][1]] = line[i:j]
-            i += 1
-        p += 1
-    print(dic)
-    return dic
+    assert len(rw.rules[4]) == 5
 
 def test_pattern_replace():
-    lines = ['M=M+1', 'M=D&M', 'M=M+1', '@R5','M=M+1','@255','D=A', '@R5']
-    pattern = '@R{x};M=M+1;@{y};D=A'
-    alt = '@{y};D=A;@R{x};M=M+1'
-    line = ';'.join(lines[3:7])
-    pats = [('@R', 'x', '', None), (';M=M+1;@', 'y', '', None), (';D=A', None, None, None)]
-    dic = find_vars(line, pats)
-    alt = alt.format(**dic).split(';')
-    lines[3:7] = alt
-    print(lines)
-    assert lines[3:7] == ['@255','D=A','@R5','M=M+1']
+    _in = ['M=M+1', 'M=D&M', 'M=M+1', '@R5','M=M+1','@255','D=A', '@R5']
+    rw = opt.rule_rewriter()
+    rule = rw.rules[4]
+    assert rw.match(_in[3:7], rule[4]) == {'y': '255', 'x':'5'}
+    p, a = rw.replace(rule[0], rule[1], {'y': '255', 'x':'5'})
+    if _in[3:7] == p: _in[3:7] = a
+    assert _in[3:7] == ['@255', 'D=A', '@R5', 'M=M+1']
+
+# def test_pattern_replace2():
+#     lines = ['M=M+1', 'M=D&M', 'M=M+1', '@R5','M=M+1','@255','D=A', '@R5']
+#     pattern = '@R{x};M=M+1;@{y};D=A'
+#     alt = '@{y};D=A;@R{x};M=M+1'
+#     line = ';'.join(lines[3:7])
+#     pats = [('@R', 'x', '', None), (';M=M+1;@', 'y', '', None), (';D=A', None, None, None)]
+#     dic = find_vars(line, pats)
+#     alt = alt.format(**dic).split(';')
+#     lines[3:7] = alt
+#     print(lines)
+#     assert lines[3:7] == ['@255','D=A','@R5','M=M+1']
 
 
 def test_redundant_stmt1():
