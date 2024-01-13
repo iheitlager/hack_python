@@ -100,6 +100,8 @@ class VMTranslator:
 
     def process_call(self, arg1, arg2):
         new_label = '{}.RET_{}'.format(self.filename, self.num_of_calls)
+        self.num_of_calls += 1
+
         res = [
             '@{}'.format(new_label),
             'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'
@@ -178,7 +180,6 @@ class VMTranslator:
                 res = self.process_push_pop(*tokens)
             elif command == 'call':
                 res = self.process_call(tokens[1], tokens[2])
-                self.num_of_calls += 1
             elif command == 'function':
                 res = self.process_function(tokens[1], tokens[2])
                 self.func_state = '{}$'.format(tokens[1])
