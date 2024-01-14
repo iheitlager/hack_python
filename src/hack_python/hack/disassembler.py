@@ -24,13 +24,16 @@ class disassembler:
         else:                   # C instr 111a c1c2c3c4c5c6 d1d2d3 j1j2j3
             return (i >> 12, ((i & 0b1_1111_1100_0000) >> 6, (i & 0b11_1000) >> 3, i & 0b111))
 
+
     def _store(self, dest):
         # Note we can store three targets (M,D,A) at once!
         ret = ""
         if dest & 0b100: ret+="A"
         if dest & 0b10: ret+="D"
         if dest & 0b1: ret+="M"
+
         return ret
+
 
     def disass_instr(self, i):
         op, operand = self._decode(i)
@@ -50,6 +53,7 @@ class disassembler:
                     return comp+';'+jump
             except KeyError:
                 raise IllegalOperand
+
         return ""
 
 

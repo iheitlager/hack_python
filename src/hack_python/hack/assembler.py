@@ -4,10 +4,12 @@ import sys
 from hack_python import HACK_POINTERS, HACK_REGISTERS, HACK_STATIC, JUMP_OPTIONS, INSTRUCTION_SET
 from hack_python.CPU import IllegalOperand
 
+
 def to_int(value):
     if value[0:2] == '0b': return int(value, 2)
     if value[0:2] == '0x': return int(value, 16)
     else: return int(value)
+
 
 class code_line:
     def __init__(self, line,
@@ -27,6 +29,7 @@ class code_line:
 
     def __str__(self):
         return "{address:04x}: {raw}".format(**self.__dict__)
+
 
 class assembler:
     def __init__(self, debug=False):

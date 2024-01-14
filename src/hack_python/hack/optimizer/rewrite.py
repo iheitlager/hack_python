@@ -1,23 +1,21 @@
 import string
 
-### First optimizer, rule based
-# RULES_OLD = {
-#     ('M=M+1', 'M=D&M', 'M=M+1'): ('M=M+1', 'M=M+1', 'M=D&M'),
-#     ('M=D&M', 'M=D&M'): ('M=D&M', ),
-#     ('M=D&M', 'D=M'): ('DM=D&M', ),
-#     ('M=D&M', 'DM=D&M'): ('DM=D&M', ),
-#     ('@R5', 'M=M+1', '@255', 'D=A'): ('@255', 'D=A', '@R5', 'M=M+1'),
-#     ('M=M+1', 'M=M+1', '@255', 'D=A'): ('M=M+1', '@255', 'D=A', 'M=M+1'),
-#     ('@R5', 'M=M+1', '@R5'): ('@255', 'D=A', '@R5', 'M=M+1'),
-# }
+### 
+# Optimizer: Rules based coder rewriter
+# Description: takes code lines and matches to replace
+# Rules
+#   stmt1;stmt2 => stmt3;stmt4
+#   stmt1;stmt2;stmt3 => stmt4;stmt5
+#   stmt1;stmt2 => stmt3;stmt4;stmt5
+#   R{x};stmt2 => stmt2;R{x}  (variable based)
 
 RULES = {
     'M=M+1;M=D&M;M=M+1': 'M=M+1;M=M+1;M=D&M',
     'M=D&M;M=D&M': 'M=D&M',
     'M=D&M;D=M': 'DM=D&M',
     'M=D&M;DM=D&M': 'DM=D&M',
-    '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
-    'M=M+1;M=M+1;@{x};D=A': 'M=M+1;@{x};D=A;M=M+1', # M=M+1;M=M+1;@R5;D=A => M=M+1;@R5;D=A;M=M+1
+    # '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
+    # 'M=M+1;M=M+1;@{x};D=A': 'M=M+1;@{x};D=A;M=M+1', # M=M+1;M=M+1;@R5;D=A => M=M+1;@R5;D=A;M=M+1
 }
 
 _ = None
@@ -54,7 +52,7 @@ class rule_rewriter:
         alt = alt.split(';')
         return alt
 
-    def match(self, lines, pat):
+    def _match(self, lines, pat):
         line = ';'.join(lines)
         dic = {}
         p = 0
@@ -74,7 +72,7 @@ class rule_rewriter:
             p += 1
         return dic
 
-    def replace(self, pattern, alt, dic):
+    def _replace(self, pattern, alt, dic):
         p = [x.format(**dic) for x in pattern]
         a = [x.format(**dic) for x in alt]
         return p, a  
@@ -92,14 +90,22 @@ class rule_rewriter:
                             lines[i:i+l] = list(alt)
                             matched = True
                         elif _type == 2 and lines[i].startswith(prefix):
-                            dic = self.match(lines[i:i+l], parms)
-                            pattern, alt = self.replace(pattern, alt, dic)
+                            dic = self._match(lines[i:i+l], parms)
+                            pattern, alt = self._replace(pattern, alt, dic)
                             if lines[i:i+l] == pattern:
                                 lines[i:i+l] = alt
                                 matched = True
 
-### Second optimizer
-def redundant_stmts(lines):    
+
+### 
+# Optimizer: Redundant assignment remover
+# Description: Tracks assignments and removes if value already set
+# Rules:
+#   @{x};@{y} => @{y}
+#   @{x} => _ if A={x}
+#   D=A => _ if D=A
+
+def redundant_assignment_remover(lines):    
     matched = True
     while matched:
         matched = False
@@ -136,74 +142,3 @@ def redundant_stmts(lines):
                 i += 1
             else:
                 i += 1
-
-
-
-# Data class for the CFG
-class block:
-    def __init__(self, name, previous=None, next=None):
-        self.name = name
-        self.lines = []
-        self.previous = previous
-        self.next = next
-        self.stats = []
-
-    def do_stats(self):
-        self.stats += [len(self.lines)]
-
-    def __repr__(self):
-        return "<block:{}-{}>".format(self.name, len(self.lines))
-
-class optimizer:
-    def __init__(self, name="start"):
-        self.current = None
-        self.blocks = []
-        self.new_block(name)
-        self.root = self.current
-        self.jump = False
-
-    def extend(self, *argv):
-        self.current.lines.extend(argv)
-
-    def new_block(self, name=""):
-        old = self.current
-        self.current = block(name, previous=old)
-        self.blocks.append(self.current)
-        if old:
-            old.next = self.current
-
-    def read_blocks(self, lines):
-        for line in lines:
-            line = line.split('//')[0]
-            if line:  
-                if line.startswith("("):
-                    self.new_block(line[1:-1])
-                    self.jump = False
-                elif self.jump:
-                    self.new_block()
-                    self.jump = False
-                elif ';JMP' in line:
-                    self.jump = True
-                    
-                self.extend(line)
-
-    def run_stats(self):
-        for b in self.blocks:
-            b.do_stats()
-
-    OPTIMIZERS = [rule_rewriter().rewrite, redundant_stmts]
-    def optimize(self, lines):
-        self.read_blocks(lines)
-        for mech in self.OPTIMIZERS:
-            self.run_stats()
-            for b in self.blocks:
-                mech(b.lines)
-            
-
-    @property
-    def lines(self):
-        for b in self.blocks:
-            for l in b.lines:
-                yield l
-
-
