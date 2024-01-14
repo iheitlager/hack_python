@@ -10,7 +10,6 @@ def main():
     parser.add_argument(
         "file", nargs="?", type=argparse.FileType("r"), default=sys.stdin, help="file to assemble or use stdin"
     )
-    parser.add_argument("-b", "--binary", action="store_true", help="read from binary")
     parser.add_argument(
         "-o", "--outfile", type=argparse.FileType("w"), default=sys.stdout, help="file to output or use stdout"
     )

@@ -15,15 +15,16 @@ class VMTranslator:
         Initialize base addresses.
         """
         res = ['@256', 'D=A', '@SP', 'M=D']
-        res += self.process_call("Sys.init", 0)
+        res += ['@Sys.init', '0;JMP']
         return res
 
     def process_sys_init(self):
         res = ["@END", "0;JMP"]  # Just to be sure
-        res += ["({})".format("Sys.init")]
+        res += ["({})".format("Sys.init")] # Init starts here
         res += self.process_call('Main.main', 0)
+        res += self.process_push_pop('pop', 'temp', 0)
         res += ["(Sys.init$end)"]
-        res += ["(END)", "@END", "0;JMP// Endloop"]
+        res += ["(END)", "@END", "0;JMP// Endloop"] # Halt
         return res
 
     def process_push_pop(self, command, arg1, arg2):

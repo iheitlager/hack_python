@@ -101,7 +101,7 @@ return
 # 
 def test_initialization():
     vmt = VMTranslator('hello.vm')
-    assert vmt.initialization()[0:5] == ['@256', 'D=A', '@SP', 'M=D', '@hello.vm.RET_0']
+    assert vmt.initialization() == ['@256', 'D=A', '@SP', 'M=D', '@Sys.init', '0;JMP']
 
 def test_lines():
     vmt = VMTranslator('hello.vm')
@@ -118,7 +118,7 @@ def test_lines():
     f.close()
 
     assert vmt.bool_count == 0
-    assert vmt.num_of_calls == 14
+    assert vmt.num_of_calls == 15
     assert vmt.func_state == "Main.main$"
     assert vmt.lines == i
 
