@@ -1,0 +1,31 @@
+?start: class
+
+class: "class" NAME "{" 
+    function*
+"}"
+
+function: "function" "void" NAME "(" ")" "{" stmt* "}"
+
+stmt: 
+    // call_function | 
+    return
+// call_function: "do" NAME "." NAME "(" expr? ")" TERMINATOR
+return: "return" TERMINATOR
+
+// expr: string
+
+// string : ESCAPED_STRING
+
+TERMINATOR: ";"
+COMMENT: "//" /[^\n]*/ NEWLINE
+NEWLINE: "\n"
+MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
+
+%import common.CNAME -> NAME
+%import common.WS
+%import common.ESCAPED_STRING
+
+%ignore WS
+%ignore COMMENT
+%ignore MULTILINE_COMMENT
+%ignore NEWLINE

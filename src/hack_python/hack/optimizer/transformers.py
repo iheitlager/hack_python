@@ -1,26 +1,28 @@
 import string
 
+
 ### 
 # Optimizer: Rules based coder rewriter
 # Description: takes code lines and matches to replace
 # Rules
-#   stmt1;stmt2 => stmt3;stmt4
-#   stmt1;stmt2;stmt3 => stmt4;stmt5
-#   stmt1;stmt2 => stmt3;stmt4;stmt5
-#   R{x};stmt2 => stmt2;R{x}  (variable based)
+#   stmt1:stmt2 => stmt3:stmt4
+#   stmt1:stmt2:stmt3 => stmt4:stmt5
+#   stmt1:stmt2 => stmt3:stmt4:stmt5
+#   R{x}:stmt2 => stmt2:R{x}  (variable based)
+# NB: semi-colon is reserved, so use colon as separator
 
 RULES = {
-    'M=M+1;M=D&M;M=M+1': 'M=M+1;M=M+1;M=D&M',
-    'M=D&M;M=D&M': 'M=D&M',
-    'M=D&M;D=M': 'DM=D&M',
-    'M=D&M;DM=D&M': 'DM=D&M',
-    # '@R{x};M=M+1;@{y};D=A': '@{y};D=A;@R{x};M=M+1', # @R5;M=M+1;@255;D=A => @255;D=A;@R5;M=M+1
-    # 'M=M+1;M=M+1;@{x};D=A': 'M=M+1;@{x};D=A;M=M+1', # M=M+1;M=M+1;@R5;D=A => M=M+1;@R5;D=A;M=M+1
+    'M=M+1:M=D&M:M=M+1': 'M=M+1:M=M+1:M=D&M',
+    'M=D&M:M=D&M': 'M=D&M',
+    'M=D&M:D=M': 'DM=D&M',
+    'M=D&M:DM=D&M': 'DM=D&M',
+    # '@R{x}:M=M+1:@{y}:D=A': '@{y}:D=A:@R{x}:M=M+1', # @R5:M=M+1:@255:D=A => @255:D=A:@R5:M=M+1
+    # 'M=M+1:M=M+1:@{x}:D=A': 'M=M+1:@{x}:D=A:M=M+1', # M=M+1:M=M+1:@R5:D=A => M=M+1:@R5:D=A:M=M+1
 }
 
 _ = None
 
-class rule_rewriter:
+class RuleRewriter:
     def __init__(self):
         self.rules = []
         for tpattern, talt in RULES.items():
@@ -41,7 +43,7 @@ class rule_rewriter:
                 vars.append(var)
             if not prefix:
                 prefix = txt
-        pattern = pattern.split(';')
+        pattern = pattern.split(':')
         return pattern, prefix, vars, pat
 
     def _parse_alt(self, alt, vars):
@@ -49,11 +51,11 @@ class rule_rewriter:
         for txt, var, _, _ in f.parse(alt):
             if var and var not in vars:
                 raise SyntaxError("var {} not in pattern".format(var))
-        alt = alt.split(';')
+        alt = alt.split(':')
         return alt
 
     def _match(self, lines, pat):
-        line = ';'.join(lines)
+        line = ':'.join(lines)
         dic = {}
         p = 0
         i, j = 0,0
@@ -101,7 +103,7 @@ class rule_rewriter:
 # Optimizer: Redundant assignment remover
 # Description: Tracks assignments and removes if value already set
 # Rules:
-#   @{x};@{y} => @{y}
+#   @{x}:@{y} => @{y}
 #   @{x} => _ if A={x}
 #   D=A => _ if D=A
 

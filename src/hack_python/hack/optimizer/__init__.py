@@ -1,30 +1,38 @@
-from . import rewrite as r
+from . import transformers as r
 
 
 # Data class for the CFG
 class block:
+    count = 0
+
     def __init__(self, name, previous=None, next=None):
         self.name = name
         self.lines = []
         self.previous = previous
         self.next = next
         self.stats = []
+        self.id = block.count 
+        if not self.name:
+            self.name = 'Block_' + str(self.id)
+        block.count += 1
 
     def do_stats(self):
         self.stats += [len(self.lines)]
 
     def __repr__(self):
-        return "<block:{}-{}>".format(self.name, len(self.lines))
+        return "<block[{}]:{} ({} lines)>".format(self.id, self.name, len(self.lines))
 
 
 class optimizer:
-    REWRITERS = [r.rule_rewriter().rewrite, r.redundant_assignment_remover]
+    '''Hack optimizer main engine. Rewrites code as block and calls other routines'''
+    
+    REWRITERS = [r.RuleRewriter().rewrite, r.redundant_assignment_remover]
 
 
     def __init__(self, name="start"):
         self.current = None
         self.blocks = []
-        self.new_block(name)
+        self._new_block(name)
         self.root = self.current
         self.jump = False
 
@@ -45,13 +53,13 @@ class optimizer:
         for line in lines:
             line = line.split('//')[0]
             if line:  
-                if line.startswith("("):
-                    self.new_block(line[1:-1])
+                if line.startswith("("): # label starts block
+                    self._new_block(line[1:-1])
                     self.jump = False
                 elif self.jump:
-                    self.new_block()
+                    self._new_block()
                     self.jump = False
-                elif ';JMP' in line:
+                elif ';JMP' in line: # unconditional jump ends block
                     self.jump = True
                     
                 self.extend(line)
@@ -64,7 +72,7 @@ class optimizer:
 
     def _rewrite(self):
         for mech in self.REWRITERS:
-            self.run_stats()
+            self._run_stats()
             for b in self.blocks:
                 mech(b.lines)
             

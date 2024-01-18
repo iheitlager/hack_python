@@ -1,25 +1,25 @@
 import pprint
 # from hack_python.hack import optimizer as opt
-from hack_python.hack.optimizer import rewrite
+from hack_python.hack.optimizer import transformers as t
 
 
 def test_rewriterules1():
     _in =  ['M=M+1', 'M=D&M', 'M=M+1', 'M=D&M', 'M=M+1', 'M=D&M', 'M=M+1', 'M=D&M', 'M=M+1', 'M=D&M']
-    rewrite.rule_rewriter().rewrite(_in)
+    t.RuleRewriter().rewrite(_in)
     assert len(_in) == 6
 
 def test_rewriterules2():
     _in = ['M=M+1', 'M=M+1', 'M=D&M', 'M=D&M', 'D=M', '@0x4000']
-    rewrite.rule_rewriter().rewrite(_in)
+    t.RuleRewriter().rewrite(_in)
     assert len(_in) == 4
 
 def test_rewriterules3():
     _in = ['M=M+1', 'M=D&M', 'M=M+1', 'M=D&M', 'M=M+1', 'M=D&M', 'D=M', '@0x4000']
-    rewrite.rule_rewriter().rewrite(_in)
+    t.RuleRewriter().rewrite(_in)
     assert _in == ['M=M+1', 'M=M+1', 'M=M+1', 'DM=D&M', '@0x4000']
 
 def test_parse_pattern():
-    rw = rewrite.rule_rewriter()
+    rw = t.RuleRewriter()
     assert len(rw.rules) == 4
 
 # def test_pattern_replace():
@@ -46,5 +46,5 @@ def test_parse_pattern():
 
 def test_redundant_assignment_remover():
     _in = ['@255', 'D=A', '@R5', 'A=M', 'M=M+1', 'M=D&M', '@255', 'D=A', '@R5']
-    rewrite.redundant_assignment_remover(_in)
+    t.redundant_assignment_remover(_in)
     assert len(_in) == 6
