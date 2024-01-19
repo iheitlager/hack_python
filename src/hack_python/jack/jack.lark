@@ -1,7 +1,6 @@
 ?start: class
 
 class: "class" NAME "{" class_stmt* "}"
-
 class_stmt: class_decl
     | function_def
 class_decl: decl_type _type var_list TERMINATOR
@@ -12,6 +11,7 @@ function_kind: "function" | "constructor" | "method"
 function_type: "void" | "int" | NAME
 function_decl: _type NAME ("," _type NAME)*
 
+block: "{" stmt* "}"
 stmt: var_decl
     | assignment
     | return
@@ -22,17 +22,20 @@ var_decl: "var" _type var_list TERMINATOR
 assignment: "let" (NAME | array) "=" expr TERMINATOR
 call_function: "do" function TERMINATOR
 while: "while" "(" comp ")" block
-if: "if" "(" comp ")" block 
-return: "return" term? TERMINATOR
+if: "if" "(" comp ")" block ("else" block )?
+return: "return" expr? TERMINATOR
 
-block: "{" stmt* "}"
-_type: "int" | NAME
-comp: expr comp_op expr
-comp_op: "<" | ">"
-expr: term (bin_op term)*
-term: NAME | string | "-"? number | function | array | "(" expr ")"
-bin_op: "+" | "-" | "*" | "//"
-function: NAME "." NAME "(" expr? ")"
+comp: "~"? "(" comp ")" (logic_op comp)* | expr (comp_op expr)? 
+logic_op: "&" | "|"
+comp_op: "<" | ">" | "="
+expr: "~"? term (bin_op term)*
+term: NAME | string | "-"? number | boolean | function | array | "(" expr ")"
+bin_op: "+" | "-" | "*" | "/"
+function: NAME ("." NAME)? "(" [func_expr] ")"
+func_expr: expr ("," expr)*
+
+_type: "int" | "char" | "boolean" | NAME
+boolean: "false" | "true" | "null"
 array: NAME "[" expr "]"
 string : ESCAPED_STRING
 number: "0" .. "9" ( "0" .. "9")*

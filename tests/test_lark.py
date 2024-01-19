@@ -34,7 +34,9 @@ class Model {
     
     constructor Model new(){
         var int i;
-                
+        var char key;                         // the key currently pressed by the user
+        var boolean exit, randomize, help;    // control flags 
+
         let grid = Array.new(SIZE);
         let i = 0;
         while(i < SIZE){
@@ -56,10 +58,19 @@ class Model {
 
     /** Gets the id of the (i,j) square. */
     function int getId(int i, int j){
-        if(i < 0){
-            return -1;
+        if(~(s = null)){                
+            if(~s.isFlag()){
+                if(~visited[s.getId()]){
+                    do moveHorizontalStartingIn(Model.getColumns(), j, right);
+                }
+            }
         }
-        if(j< 0){
+        while((k < Model.getColumns()) & (k >  - 1)){
+            if(i < 0){
+                return -1;
+            }
+        }
+        if(j < 0){
             return -1;
         }
         if(i > (COLUMNS - 1)){
@@ -67,7 +78,11 @@ class Model {
         }
         if(j > (ROWS - 1)){
             return -1;
+        } else {
+            let k = k - 1;
         }
+        if (key = 130) { do nandMines.moveHorizontal(false); } // left arrow
+
         return (j * COLUMNS) + i;
     }
 }'''
