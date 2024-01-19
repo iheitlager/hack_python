@@ -1,17 +1,41 @@
 ?start: class
 
-class: "class" NAME "{" function "}"
+class: "class" NAME "{" class_stmt* "}"
 
-function: "function" function_type NAME "(" ")" "{" stmt* "}"
-function_type: "void" | NAME
+class_stmt: class_decl
+    | function_def
+class_decl: decl_type _type var_list TERMINATOR
+decl_type: "field" | "static"
+var_list: NAME ("," NAME)*
+function_def: function_kind function_type NAME "(" function_decl? ")" block
+function_kind: "function" | "constructor" | "method"
+function_type: "void" | "int" | NAME
+function_decl: _type NAME ("," _type NAME)*
 
-stmt: return
+stmt: var_decl
+    | assignment
+    | return
     | call_function
-call_function: "do" NAME "." NAME "(" expr? ")" TERMINATOR
-return: "return" TERMINATOR
+    | while
+    | if
+var_decl: "var" _type var_list TERMINATOR
+assignment: "let" (NAME | array) "=" expr TERMINATOR
+call_function: "do" function TERMINATOR
+while: "while" "(" comp ")" block
+if: "if" "(" comp ")" block 
+return: "return" term? TERMINATOR
 
-expr: string
+block: "{" stmt* "}"
+_type: "int" | NAME
+comp: expr comp_op expr
+comp_op: "<" | ">"
+expr: term (bin_op term)*
+term: NAME | string | "-"? number | function | array | "(" expr ")"
+bin_op: "+" | "-" | "*" | "//"
+function: NAME "." NAME "(" expr? ")"
+array: NAME "[" expr "]"
 string : ESCAPED_STRING
+number: "0" .. "9" ( "0" .. "9")*
 
 TERMINATOR: ";"
 COMMENT: "//" /[^\n]*/ NEWLINE
