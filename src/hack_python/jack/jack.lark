@@ -1,20 +1,17 @@
 ?start: class
 
-class: "class" NAME "{" 
-    function*
-"}"
+class: "class" NAME "{" function "}"
 
-function: "function" "void" NAME "(" ")" "{" stmt* "}"
+function: "function" function_type NAME "(" ")" "{" stmt* "}"
+function_type: "void" | NAME
 
-stmt: 
-    // call_function | 
-    return
-// call_function: "do" NAME "." NAME "(" expr? ")" TERMINATOR
+stmt: return
+    | call_function
+call_function: "do" NAME "." NAME "(" expr? ")" TERMINATOR
 return: "return" TERMINATOR
 
-// expr: string
-
-// string : ESCAPED_STRING
+expr: string
+string : ESCAPED_STRING
 
 TERMINATOR: ";"
 COMMENT: "//" /[^\n]*/ NEWLINE
