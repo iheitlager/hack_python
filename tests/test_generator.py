@@ -1,7 +1,7 @@
 import pytest
 
-from hack_python import generator as g
-from hack_python import ast as a
+from hack_python.other import generator as g
+from hack_python.other import ast as a
 
 
 def test_var_code():

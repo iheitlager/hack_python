@@ -1,8 +1,18 @@
+import rich
+import pytest
 import lark
+from lark import ast_utils
+
+from hack_python.jack import ast
 
 comment = '''/* these are some preliminary remarks
  * what do you think
  */'''
+
+small_example = '''class Model {
+    static int SIZE, COLUMNS, ROWS;
+}
+'''
 
 base_grammar = '''class Main { 
     function void main() {
@@ -91,7 +101,7 @@ def test_base_grammar():
     lark_path = '../src/hack_python/jack/jack.lark'
     parser = lark.Lark.open(lark_path, rel_to=__file__, parser="lalr")
     tree = parser.parse(base_grammar)
-    print(tree)
+    print(tree.pretty())
     assert isinstance(tree, lark.Tree)
 
 def test_base_grammar_comment():
@@ -106,4 +116,14 @@ def test_longer_grammar():
     parser = lark.Lark.open(lark_path, rel_to=__file__, parser="lalr")
     tree = parser.parse(longer_grammer)
     print(tree)
+    assert isinstance(tree, lark.Tree)
+
+def test_small_example():
+    lark_path = '../src/hack_python/jack/jack.lark'
+    parser = lark.Lark.open(lark_path, rel_to=__file__, parser="lalr")
+    transformer = ast_utils.create_transformer(ast.this_module, ast.ToAst())
+    tree = parser.parse(small_example)
+    print(tree)
+    rich.print(tree)
+    rich.print(transformer.transform(tree))
     assert isinstance(tree, lark.Tree)
