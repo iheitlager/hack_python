@@ -127,3 +127,6 @@ def test_small_example():
     rich.print(tree)
     rich.print(transformer.transform(tree))
     assert isinstance(tree, lark.Tree)
+
+
+## I stopped till generator because AST is not complete and integrated

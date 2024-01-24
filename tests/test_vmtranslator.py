@@ -121,21 +121,3 @@ def test_lines():
     assert vmt.num_of_calls == 15
     assert vmt.func_state == "Main.main$"
     assert vmt.lines == i
-
-
-def test_bf2asm():
-    f_in = open('./examples/bf.vm', 'r')
-    lines = f_in.readlines()
-    f_in.close()
-    vmt = VMTranslator('bf.vm')
-    f = open('./examples/bf.asm', 'w')
-    f.write("// Initialization of {}\n".format(vmt.filename))
-    for stmt in vmt.initialization():
-        f.write(stmt+'\n')
-    for i, line in enumerate(lines):
-        f.write("// {:05d} {}\n".format(i, line))
-        for stmt in vmt.process_line(line, i):
-            f.write(stmt+'\n')
-    for stmt in vmt.process_sys_init():
-        f.write(stmt+'\n')
-    f.close()

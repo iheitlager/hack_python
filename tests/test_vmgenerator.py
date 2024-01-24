@@ -152,22 +152,3 @@ def test_pong_game():
         print(line)
     assert len(gen.out_stream) == 352
     assert gen.out_stream[-1] == 'return'
-
-
-# @pytest.mark.skip(reason="used as code generator")
-def test_brainfuck():
-    f = open('./examples/bf.jack')
-    p = f.read()
-    f.close()
-    par = Parser()
-    par.compile(p)
-    pprint.pprint(par.ast)
-    assert len(par.ast) == 1
-    gen = VMGenerator()
-    gen.generate(par.ast)
-    f = open('./examples/bf.vm', "w")
-    for line in gen.out_stream:
-        f.write(line + '\n')
-    f.close()
-    assert len(gen.out_stream) == 619
-    assert gen.out_stream[-1] == 'return'

@@ -1,6 +1,6 @@
 # comment, label, 
-from .CPU import IllegalOperand
-from . import HACK_STACK, HACK_REGISTERS
+from hack_python import IllegalOperand
+from hack_python import HACK_STACK, HACK_REGISTERS
 from . import ast as a
 
 def pprint(code_list, end='\n'):
